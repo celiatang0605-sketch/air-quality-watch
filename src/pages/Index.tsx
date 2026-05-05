@@ -289,6 +289,23 @@ export default function Index() {
     setPage("detail");
   };
 
+  const submitNewPlace = (data: { name: string; type: Exclude<Category, "全部">; address: string; img: string }) => {
+    const id = Math.max(...places.map(p => p.id)) + 1;
+    const np: Place = {
+      id, name: data.name, type: data.type, address: data.address,
+      distance: `${(Math.random() * 2 + 0.2).toFixed(1)}km`,
+      reviewCount: 0, smokeReports: 0,
+      tags: ["待审核"], img: data.img || "📍",
+      businessHours: "暂无", phone: "暂无",
+      reviews: [], notes: [],
+    };
+    setPlaces(prev => [np, ...prev]);
+    setPoints(v => v + 10);
+    setPointLogs(l => [{ id: Math.random().toString(36).slice(2), type: "添加新场所", value: 10, time: nowLabel() }, ...l]);
+    toast.success("场所提交成功，获得 10 积分 🎉");
+    setPage("home"); setTab("home");
+  };
+
   return (
     <div className="min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6">
       <div className="relative w-full sm:max-w-[390px] min-h-screen sm:min-h-[844px] sm:rounded-[2.5rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
