@@ -766,10 +766,10 @@ function ReviewPage({ place, onBack, onSubmit }: {
         <div className="bg-primary-soft text-primary rounded-2xl p-3 text-sm flex items-center gap-2">
           <MapPin className="w-4 h-4" />{place ? place.name : "请选择场所"}
         </div>
-        <Choice label="① 无烟标志" options={["有", "无"]} value={sign} onChange={setSign} />
-        <Choice label="② 实际是否有人抽烟" options={["有", "无"]} value={smoker} onChange={setSmoker} />
-        <Choice label="③ 空气是否有烟味" options={["有", "无"]} value={smell} onChange={setSmell} />
-        <Choice label="④ 工作人员是否劝阻" options={["有", "无", "没看到"]} value={staff} onChange={setStaff} />
+        <Choice<"有" | "无"> label="① 无烟标志" options={["有", "无"]} value={sign} onChange={setSign} />
+        <Choice<"有" | "无"> label="② 实际是否有人抽烟" options={["有", "无"]} value={smoker} onChange={setSmoker} />
+        <Choice<"有" | "无"> label="③ 空气是否有烟味" options={["有", "无"]} value={smell} onChange={setSmell} />
+        <Choice<"有" | "无" | "没看到"> label="④ 工作人员是否劝阻" options={["有", "无", "没看到"]} value={staff} onChange={setStaff} />
 
         <textarea
           value={text} onChange={e => setText(e.target.value)}
