@@ -955,7 +955,7 @@ function DetailPage({ place, fav, onFav, onBack, onReview, onNote, onReport, onC
   return (
     <div className="pb-32">
       <TopBar title="场所详情" onBack={onBack} />
-      <img src={place.img} alt={place.name} className="w-full h-44 object-cover bg-secondary" />
+      <PlaceImg src={place.img} type={place.type} alt={place.name} className="w-full h-44 object-cover bg-secondary" />
       <div className="p-4">
         <h1 className="text-lg font-bold">{place.name}</h1>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
