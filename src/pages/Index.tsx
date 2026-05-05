@@ -745,8 +745,10 @@ function NoteCard({ n }: { n: NoteItem }) {
   );
 }
 
-function DetailPage({ place, fav, onFav, onBack, onReview, onNote }: {
-  place: Place; fav: boolean; onFav: () => void; onBack: () => void; onReview: () => void; onNote: () => void;
+function DetailPage({ place, fav, onFav, onBack, onReview, onNote, onReport, onCorrection }: {
+  place: Place; fav: boolean; onFav: () => void; onBack: () => void;
+  onReview: () => void; onNote: () => void;
+  onReport?: () => void; onCorrection?: () => void;
 }) {
   const score = placeAvgScore(place);
   return (
