@@ -1461,9 +1461,9 @@ function AddPlacePage({ city, onBack, onSubmit }: {
           </Field>
         </div>
 
-        <Choice label="是否看到无烟标志" options={["有", "无"] as const} value={sign} onChange={setSign} />
-        <Choice label="是否有人吸烟" options={["有", "无"] as const} value={smoker} onChange={setSmoker} />
-        <Choice label="是否有烟味" options={["有", "无"] as const} value={smell} onChange={setSmell} />
+        <Choice label="是否看到无烟标志" options={["有", "无"] as const} value={sign} onChange={(v) => setSign(v)} />
+        <Choice label="是否有人吸烟" options={["有", "无"] as const} value={smoker} onChange={(v) => setSmoker(v)} />
+        <Choice label="是否有烟味" options={["有", "无"] as const} value={smell} onChange={(v) => setSmell(v)} />
 
         <div className="bg-card border border-border rounded-2xl p-4">
           <div className="text-sm font-medium mb-2">上传场所图片</div>
