@@ -264,7 +264,8 @@ export default function Index() {
     { id: "p4", type: "提交评价", value: 5, time: "今天 10:12" },
   ]);
   const [places, setPlaces] = useState<Place[]>(PLACES_INIT);
-  const [myNotes, setMyNotes] = useState<NoteItem[]>([]);
+  const [allNotes, setAllNotes] = useState<NoteItem[]>(SEED_NOTES);
+  const myNotes = useMemo(() => allNotes.filter(n => n.user === "我"), [allNotes]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [city, setCity] = useState("上海市 静安区");
   const [fontSize, setFontSize] = useState<FontSize>("standard");
