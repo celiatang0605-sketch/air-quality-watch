@@ -783,6 +783,21 @@ function DetailPage({ place, fav, onFav, onBack, onReview, onNote, onReport, onC
           <Award className="w-4 h-4" /> 完成评价可获得 5 积分，发笔记 +10 积分
         </div>
 
+        {(onReport || onCorrection) && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {onReport && (
+              <button onClick={onReport} className="h-11 rounded-xl bg-card border border-border flex items-center justify-center gap-1.5 text-xs text-destructive active:scale-[0.99] transition">
+                <AlertTriangle className="w-4 h-4" />举报吸烟问题
+              </button>
+            )}
+            {onCorrection && (
+              <button onClick={onCorrection} className="h-11 rounded-xl bg-card border border-border flex items-center justify-center gap-1.5 text-xs text-foreground active:scale-[0.99] transition">
+                <FileEdit className="w-4 h-4" />纠错信息
+              </button>
+            )}
+          </div>
+        )}
+
         {/* 用户评价 */}
         <div className="mt-5">
           <div className="flex items-center justify-between mb-2">
