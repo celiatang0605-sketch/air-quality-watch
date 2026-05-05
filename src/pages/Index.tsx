@@ -5,7 +5,8 @@ import {
   Home, Trophy, PlusCircle, User, Coffee, Utensils, ShoppingBag, Hotel,
   Film, Mic2, Dumbbell, BookOpen, CupSoda, Building2, ArrowLeft, Camera,
   Wallet, Award, Eye, LifeBuoy, LogOut, Check, Cigarette, ShieldCheck,
-  Phone, Clock, Copy, Trash2, X,
+  Phone, Clock, Copy, Trash2, X, Settings, AlertTriangle, FileEdit,
+  HelpCircle, Sparkles, ChevronDown, Type as TypeIcon, MapPinned,
 } from "lucide-react";
 
 type Category =
@@ -180,10 +181,14 @@ const MOCK_PLACES: Place[] = [
 ];
 
 type Page =
-  | "login" | "home" | "list" | "detail" | "review" | "note"
-  | "rank" | "me" | "wallet" | "favorites" | "history" | "points";
+  | "login" | "home" | "list" | "search" | "category" | "detail" | "review" | "note"
+  | "rank" | "me" | "wallet" | "favorites" | "history" | "points"
+  | "addPlace" | "report" | "correction" | "help" | "settings" | "demo";
 
 type Tab = "home" | "rank" | "publish" | "me";
+
+type SortKey = "default" | "distance" | "score" | "reviews" | "smoke";
+type FontSize = "standard" | "large" | "xlarge";
 
 type PointLog = { id: string; type: string; value: number; time: string };
 
@@ -204,6 +209,13 @@ export default function Index() {
   ]);
   const [places, setPlaces] = useState<Place[]>(MOCK_PLACES);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [city, setCity] = useState("上海市 静安区");
+  const [fontSize, setFontSize] = useState<FontSize>("standard");
+  const [notifyOn, setNotifyOn] = useState(true);
+  const [searchSort, setSearchSort] = useState<SortKey>("default");
+  const [catSort, setCatSort] = useState<SortKey>("default");
+
+  const fontClass = fontSize === "large" ? "text-[17px]" : fontSize === "xlarge" ? "text-[19px]" : "text-[15px]";
 
   // sync activePlace when places list updates
   useEffect(() => {
@@ -232,7 +244,7 @@ export default function Index() {
     setTab(t);
     if (t === "home") setPage("home");
     if (t === "rank") setPage("rank");
-    if (t === "publish") setPage("note");
+    if (t === "publish") setPage("addPlace");
     if (t === "me") setPage("me");
   };
 
@@ -277,8 +289,25 @@ export default function Index() {
     setPage("detail");
   };
 
+  const submitNewPlace = (data: { name: string; type: Exclude<Category, "全部">; address: string; img: string }) => {
+    const id = Math.max(...places.map(p => p.id)) + 1;
+    const np: Place = {
+      id, name: data.name, type: data.type, address: data.address,
+      distance: `${(Math.random() * 2 + 0.2).toFixed(1)}km`,
+      reviewCount: 0, smokeReports: 0,
+      tags: ["待审核"], img: data.img || "📍",
+      businessHours: "暂无", phone: "暂无",
+      reviews: [], notes: [],
+    };
+    setPlaces(prev => [np, ...prev]);
+    setPoints(v => v + 10);
+    setPointLogs(l => [{ id: Math.random().toString(36).slice(2), type: "添加新场所", value: 10, time: nowLabel() }, ...l]);
+    toast.success("场所提交成功，获得 10 积分 🎉");
+    setPage("home"); setTab("home");
+  };
+
   return (
-    <div className="min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6">
+    <div className={`min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6 ${fontClass}`}>
       <div className="relative w-full sm:max-w-[390px] min-h-screen sm:min-h-[844px] sm:rounded-[2.5rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
         <div className="hidden sm:flex h-7 items-center justify-between px-6 text-[11px] text-foreground/70 bg-background">
           <span>9:41</span>
@@ -286,15 +315,26 @@ export default function Index() {
           <span>100%</span>
         </div>
 
+        {page !== "login" && page !== "demo" && (
+          <button
+            onClick={() => setPage("demo")}
+            className="absolute top-2 right-3 z-30 text-[10px] px-2 py-1 rounded-full bg-accent text-accent-foreground shadow-md flex items-center gap-1"
+          >
+            <Sparkles className="w-3 h-3" /> Demo 演示
+          </button>
+        )}
+
         <div className="flex-1 overflow-y-auto pb-24">
           {page === "login" && <Login onLogin={() => { setPage("home"); setTab("home"); setShowOnboarding(true); toast.success("登录成功，欢迎来到空气点评"); }} />}
           {page === "home" && (
             <HomePage
               search={search} setSearch={setSearch}
-              filterCat={filterCat} setFilterCat={(c) => { setFilterCat(c); setPage("list"); }}
+              city={city}
+              filterCat={filterCat} setFilterCat={(c) => { setFilterCat(c); setPage("category"); }}
               places={places.slice(0, 6)} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onSeeAll={() => setPage("list")}
+              onSearchSubmit={() => setPage("search")}
             />
           )}
           {page === "list" && (
@@ -302,6 +342,26 @@ export default function Index() {
               filterCat={filterCat} setFilterCat={setFilterCat}
               search={search} setSearch={setSearch}
               places={filtered} onPlace={goPlace}
+              favorites={favorites} onFav={toggleFav}
+              onBack={() => setPage("home")}
+            />
+          )}
+          {page === "search" && (
+            <SearchPage
+              search={search} setSearch={setSearch}
+              sort={searchSort} setSort={setSearchSort}
+              places={places} onPlace={goPlace}
+              favorites={favorites} onFav={toggleFav}
+              onBack={() => setPage("home")}
+              onAdd={() => setPage("addPlace")}
+            />
+          )}
+          {page === "category" && (
+            <CategoryPage
+              cat={filterCat === "全部" ? "餐厅" : filterCat as Exclude<Category, "全部">}
+              setCat={(c) => setFilterCat(c)}
+              sort={catSort} setSort={setCatSort}
+              places={places} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onBack={() => setPage("home")}
             />
@@ -314,6 +374,8 @@ export default function Index() {
               onBack={() => setPage("home")}
               onReview={() => setPage("review")}
               onNote={() => setPage("note")}
+              onReport={() => setPage("report")}
+              onCorrection={() => setPage("correction")}
             />
           )}
           {page === "review" && (
@@ -330,16 +392,33 @@ export default function Index() {
               onSubmit={submitNote}
             />
           )}
+          {page === "addPlace" && (
+            <AddPlacePage
+              city={city}
+              onBack={() => setPage(tab === "publish" ? "home" : "home")}
+              onSubmit={submitNewPlace}
+            />
+          )}
+          {page === "report" && activePlace && (
+            <ReportPage place={activePlace} onBack={() => setPage("detail")} />
+          )}
+          {page === "correction" && activePlace && (
+            <CorrectionPage place={activePlace} onBack={() => setPage("detail")} />
+          )}
           {page === "rank" && (
             <RankPage places={places} onPlace={goPlace} favorites={favorites} onFav={toggleFav} />
           )}
           {page === "me" && (
             <MePage
               points={points} favCount={favorites.length} historyCount={history.length}
+              city={city}
               onWallet={() => setPage("wallet")}
               onPoints={() => setPage("points")}
               onFavorites={() => setPage("favorites")}
               onHistory={() => setPage("history")}
+              onAddPlace={() => setPage("addPlace")}
+              onHelp={() => setPage("help")}
+              onSettings={() => setPage("settings")}
               onLogout={() => { setPage("login"); toast("已退出登录"); }}
             />
           )}
@@ -363,9 +442,19 @@ export default function Index() {
               onBack={() => setPage("me")}
             />
           )}
+          {page === "help" && <HelpPage onBack={() => setPage("me")} />}
+          {page === "settings" && (
+            <SettingsPage
+              fontSize={fontSize} setFontSize={setFontSize}
+              city={city} setCity={setCity}
+              notifyOn={notifyOn} setNotifyOn={setNotifyOn}
+              onBack={() => setPage("me")}
+            />
+          )}
+          {page === "demo" && <DemoShowcase onBack={() => setPage("home")} />}
         </div>
 
-        {page !== "login" && <BottomTab tab={tab} onChange={goTab} />}
+        {page !== "login" && page !== "demo" && <BottomTab tab={tab} onChange={goTab} />}
         {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
       </div>
     </div>
@@ -478,21 +567,26 @@ function PlaceCard({ p, fav, onFav, onClick }: { p: Place; fav: boolean; onFav: 
 
 function HomePage(props: {
   search: string; setSearch: (v: string) => void;
+  city?: string;
   filterCat: Category; setFilterCat: (c: Category) => void;
   places: Place[]; onPlace: (p: Place) => void;
   favorites: number[]; onFav: (id: number) => void;
   onSeeAll: () => void;
+  onSearchSubmit?: () => void;
 }) {
   return (
     <div>
       <div className="bg-gradient-to-b from-primary-soft to-background px-4 pt-4 pb-3">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-1 text-foreground font-medium">
-            <MapPin className="w-4 h-4 text-primary" /> 上海市 静安区 <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <MapPin className="w-4 h-4 text-primary" /> {props.city || "上海市 静安区"} <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
           <Bell className="w-5 h-5 text-muted-foreground" />
         </div>
-        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl px-3 h-10 border border-border/60 shadow-sm">
+        <form
+          onSubmit={(e) => { e.preventDefault(); props.onSearchSubmit?.(); }}
+          className="mt-3 flex items-center gap-2 bg-card rounded-2xl px-3 h-10 border border-border/60 shadow-sm"
+        >
           <Search className="w-4 h-4 text-muted-foreground" />
           <input
             value={props.search}
@@ -500,7 +594,10 @@ function HomePage(props: {
             placeholder="搜索餐厅、咖啡馆、商场"
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-        </div>
+          {props.search && (
+            <button type="submit" className="text-xs text-primary font-medium">搜索</button>
+          )}
+        </form>
       </div>
 
       <div className="px-2 py-3 overflow-x-auto">
@@ -648,8 +745,10 @@ function NoteCard({ n }: { n: NoteItem }) {
   );
 }
 
-function DetailPage({ place, fav, onFav, onBack, onReview, onNote }: {
-  place: Place; fav: boolean; onFav: () => void; onBack: () => void; onReview: () => void; onNote: () => void;
+function DetailPage({ place, fav, onFav, onBack, onReview, onNote, onReport, onCorrection }: {
+  place: Place; fav: boolean; onFav: () => void; onBack: () => void;
+  onReview: () => void; onNote: () => void;
+  onReport?: () => void; onCorrection?: () => void;
 }) {
   const score = placeAvgScore(place);
   return (
@@ -683,6 +782,21 @@ function DetailPage({ place, fav, onFav, onBack, onReview, onNote }: {
         <div className="mt-4 bg-accent-soft text-accent rounded-2xl p-3 text-xs flex items-center gap-2">
           <Award className="w-4 h-4" /> 完成评价可获得 5 积分，发笔记 +10 积分
         </div>
+
+        {(onReport || onCorrection) && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {onReport && (
+              <button onClick={onReport} className="h-11 rounded-xl bg-card border border-border flex items-center justify-center gap-1.5 text-xs text-destructive active:scale-[0.99] transition">
+                <AlertTriangle className="w-4 h-4" />举报吸烟问题
+              </button>
+            )}
+            {onCorrection && (
+              <button onClick={onCorrection} className="h-11 rounded-xl bg-card border border-border flex items-center justify-center gap-1.5 text-xs text-foreground active:scale-[0.99] transition">
+                <FileEdit className="w-4 h-4" />纠错信息
+              </button>
+            )}
+          </div>
+        )}
 
         {/* 用户评价 */}
         <div className="mt-5">
@@ -936,9 +1050,10 @@ function MeRow({ icon: Icon, label, value, onClick, accent }: { icon: any; label
   );
 }
 
-function MePage({ points, favCount, historyCount, onWallet, onPoints, onFavorites, onHistory, onLogout }: {
-  points: number; favCount: number; historyCount: number;
-  onWallet: () => void; onPoints: () => void; onFavorites: () => void; onHistory: () => void; onLogout: () => void;
+function MePage({ points, favCount, historyCount, city, onWallet, onPoints, onFavorites, onHistory, onAddPlace, onHelp, onSettings, onLogout }: {
+  points: number; favCount: number; historyCount: number; city?: string;
+  onWallet: () => void; onPoints: () => void; onFavorites: () => void; onHistory: () => void;
+  onAddPlace?: () => void; onHelp?: () => void; onSettings?: () => void; onLogout: () => void;
 }) {
   return (
     <div>
@@ -948,7 +1063,7 @@ function MePage({ points, favCount, historyCount, onWallet, onPoints, onFavorite
           <div>
             <div className="font-bold text-lg">空气守护者</div>
             <div className="text-xs opacity-90 flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3" /> 上海市 · 静安区
+              <MapPin className="w-3 h-3" /> {city || "上海市 · 静安区"}
             </div>
           </div>
         </div>
@@ -974,14 +1089,15 @@ function MePage({ points, favCount, historyCount, onWallet, onPoints, onFavorite
         <MeRow icon={Wallet} label="我的钱包" value={`${points} 余额`} onClick={onWallet} accent />
         <MeRow icon={Heart} label="我的收藏" value={`${favCount} 个`} onClick={onFavorites} />
         <MeRow icon={Eye} label="最近浏览" value={`${historyCount} 个`} onClick={onHistory} />
-        <MeRow icon={LifeBuoy} label="帮助中心" onClick={() => toast("Demo：帮助中心")} />
+        <MeRow icon={PlusCircle} label="添加新场所" onClick={onAddPlace} />
+        <MeRow icon={HelpCircle} label="帮助中心" onClick={onHelp} />
+        <MeRow icon={Settings} label="设置" onClick={onSettings} />
         <MeRow icon={LogOut} label="退出登录" onClick={onLogout} />
       </div>
       <div className="text-center text-[11px] text-muted-foreground mt-4 pb-4">空气点评 · v1.0 Demo</div>
     </div>
   );
 }
-
 function PointsPage({ points, logs, onBack, onWallet }: { points: number; logs: PointLog[]; onBack: () => void; onWallet: () => void; }) {
   return (
     <div>
@@ -1167,6 +1283,475 @@ function BottomTab({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void; })
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/* =================== Search Page =================== */
+
+const SORT_LABELS: Record<SortKey, string> = {
+  default: "综合推荐",
+  distance: "距离最近",
+  score: "评分最高",
+  reviews: "评价最多",
+  smoke: "无烟友好",
+};
+
+function sortPlaces(places: Place[], key: SortKey): Place[] {
+  const arr = [...places];
+  const num = (s: string) => parseFloat(s.replace("km", "").replace("m", "")) * (s.includes("km") ? 1000 : 1);
+  if (key === "distance") arr.sort((a, b) => num(a.distance) - num(b.distance));
+  if (key === "score") arr.sort((a, b) => placeAvgScore(b) - placeAvgScore(a));
+  if (key === "reviews") arr.sort((a, b) => b.reviewCount - a.reviewCount);
+  if (key === "smoke") arr.sort((a, b) => a.smokeReports - b.smokeReports || placeAvgScore(b) - placeAvgScore(a));
+  return arr;
+}
+
+function SortBar({ value, onChange, options }: {
+  value: SortKey; onChange: (v: SortKey) => void;
+  options: SortKey[];
+}) {
+  return (
+    <div className="flex gap-2 px-4 py-2 overflow-x-auto">
+      {options.map(o => (
+        <button key={o} onClick={() => onChange(o)}
+          className={`shrink-0 px-3 h-8 rounded-full text-xs font-medium border transition ${
+            value === o ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
+          }`}>{SORT_LABELS[o]}</button>
+      ))}
+    </div>
+  );
+}
+
+function SearchPage({ search, setSearch, sort, setSort, places, onPlace, favorites, onFav, onBack, onAdd }: {
+  search: string; setSearch: (v: string) => void;
+  sort: SortKey; setSort: (s: SortKey) => void;
+  places: Place[]; onPlace: (p: Place) => void;
+  favorites: number[]; onFav: (id: number) => void;
+  onBack: () => void; onAdd: () => void;
+}) {
+  const filtered = useMemo(() => {
+    const s = search.trim();
+    const list = s ? places.filter(p => p.name.includes(s) || p.type.includes(s) || p.tags.some(t => t.includes(s))) : places;
+    return sortPlaces(list, sort);
+  }, [search, places, sort]);
+
+  return (
+    <div>
+      <div className="sticky top-0 z-20 bg-background border-b border-border">
+        <div className="h-12 flex items-center px-3 gap-2">
+          <button onClick={onBack} className="p-1"><ArrowLeft className="w-5 h-5" /></button>
+          <div className="flex-1 flex items-center gap-2 bg-secondary rounded-xl px-3 h-9">
+            <Search className="w-4 h-4 text-muted-foreground" />
+            <input
+              autoFocus value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="搜索场所"
+              className="flex-1 bg-transparent text-sm outline-none"
+            />
+            {search && <button onClick={() => setSearch("")}><X className="w-4 h-4 text-muted-foreground" /></button>}
+          </div>
+        </div>
+        <SortBar value={sort} onChange={setSort} options={["distance", "score", "reviews", "smoke"]} />
+      </div>
+      <div className="p-4 space-y-3">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Search className="w-10 h-10 text-muted-foreground opacity-50 mb-3" />
+            <p className="text-sm text-muted-foreground max-w-[260px]">暂时找不到相关场所，你可以换个关键词，或者添加这个场所</p>
+            <div className="mt-5 flex gap-2 w-full max-w-[280px]">
+              <button onClick={onBack} className="flex-1 h-11 rounded-xl bg-secondary text-foreground text-sm font-medium">返回首页</button>
+              <button onClick={onAdd} className="flex-1 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-medium">添加新场所</button>
+            </div>
+          </div>
+        ) : filtered.map(p => (
+          <PlaceCard key={p.id} p={p} fav={favorites.includes(p.id)} onFav={() => onFav(p.id)} onClick={() => onPlace(p)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =================== Category Page =================== */
+
+function CategoryPage({ cat, setCat, sort, setSort, places, onPlace, favorites, onFav, onBack }: {
+  cat: Exclude<Category, "全部">;
+  setCat: (c: Exclude<Category, "全部">) => void;
+  sort: SortKey; setSort: (s: SortKey) => void;
+  places: Place[]; onPlace: (p: Place) => void;
+  favorites: number[]; onFav: (id: number) => void;
+  onBack: () => void;
+}) {
+  const list = useMemo(() => sortPlaces(places.filter(p => p.type === cat), sort), [cat, sort, places]);
+  const cats = CATEGORIES.map(c => c.key);
+  return (
+    <div>
+      <TopBar title={cat} onBack={onBack} />
+      <div className="px-2 pt-2 overflow-x-auto">
+        <div className="flex gap-2 px-2 min-w-max">
+          {cats.map(c => (
+            <button key={c} onClick={() => setCat(c as Exclude<Category, "全部">)}
+              className={`px-3 h-8 rounded-full text-xs font-medium border transition ${
+                cat === c ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
+              }`}>{c}</button>
+          ))}
+        </div>
+      </div>
+      <SortBar value={sort} onChange={setSort} options={["default", "distance", "score", "reviews"]} />
+      <div className="px-4 pb-4 space-y-3">
+        {list.length === 0 ? (
+          <EmptyState icon={MapPin} text={`暂无「${cat}」场所，去添加一个吧`} />
+        ) : list.map(p => (
+          <PlaceCard key={p.id} p={p} fav={favorites.includes(p.id)} onFav={() => onFav(p.id)} onClick={() => onPlace(p)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =================== Add Place =================== */
+
+const PLACE_EMOJIS: Record<string, string> = {
+  "餐厅": "🍽️", "咖啡馆": "☕", "商场": "🛍️", "酒店": "🏨", "电影院": "🎬",
+  "KTV": "🎤", "健身房": "🏋️", "书店": "📚", "奶茶店": "🧋", "写字楼": "🏢",
+};
+
+function AddPlacePage({ city, onBack, onSubmit }: {
+  city: string; onBack: () => void;
+  onSubmit: (d: { name: string; type: Exclude<Category, "全部">; address: string; img: string }) => void;
+}) {
+  const [name, setName] = useState("");
+  const [type, setType] = useState<Exclude<Category, "全部"> | "">("");
+  const [address, setAddress] = useState("");
+  const [sign, setSign] = useState<"" | "有" | "无">("");
+  const [smoker, setSmoker] = useState<"" | "有" | "无">("");
+  const [smell, setSmell] = useState<"" | "有" | "无">("");
+  const [hasImg, setHasImg] = useState(false);
+
+  const submit = () => {
+    if (!name.trim() || !type || !address.trim()) {
+      toast.error("请完成必填项后提交");
+      return;
+    }
+    onSubmit({ name: name.trim(), type: type as Exclude<Category, "全部">, address: address.trim(), img: PLACE_EMOJIS[type] || "📍" });
+  };
+
+  return (
+    <div>
+      <TopBar title="添加新场所" onBack={onBack} />
+      <div className="p-4 space-y-3">
+        <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+          <Field label="场所名称" required>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="例如：星巴克 静安寺店"
+              className="w-full h-10 bg-secondary rounded-xl px-3 text-sm outline-none" />
+          </Field>
+          <Field label="场所类型" required>
+            <div className="flex flex-wrap gap-1.5">
+              {CATEGORIES.map(c => (
+                <button key={c.key} onClick={() => setType(c.key as Exclude<Category, "全部">)}
+                  className={`px-2.5 h-8 rounded-full text-xs border ${type === c.key ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border"}`}>{c.key}</button>
+              ))}
+            </div>
+          </Field>
+          <Field label="场所地址" required>
+            <input value={address} onChange={e => setAddress(e.target.value)} placeholder="例如：南京西路 123 号"
+              className="w-full h-10 bg-secondary rounded-xl px-3 text-sm outline-none" />
+          </Field>
+          <Field label="当前城市">
+            <div className="h-10 bg-secondary rounded-xl px-3 text-sm flex items-center text-muted-foreground">{city}</div>
+          </Field>
+        </div>
+
+        <Choice label="是否看到无烟标志" options={["有", "无"] as const} value={sign} onChange={(v) => setSign(v)} />
+        <Choice label="是否有人吸烟" options={["有", "无"] as const} value={smoker} onChange={(v) => setSmoker(v)} />
+        <Choice label="是否有烟味" options={["有", "无"] as const} value={smell} onChange={(v) => setSmell(v)} />
+
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-sm font-medium mb-2">上传场所图片</div>
+          <button onClick={() => { setHasImg(true); toast.success("图片已添加（Demo 模拟）"); }}
+            className={`w-full aspect-[4/3] rounded-xl border border-dashed flex flex-col items-center justify-center text-muted-foreground active:scale-[0.99] transition ${hasImg ? "bg-primary-soft border-primary text-primary" : "bg-secondary border-border"}`}>
+            {hasImg ? <><Check className="w-6 h-6" /><span className="text-xs mt-1">已上传</span></> : <><Camera className="w-6 h-6" /><span className="text-xs mt-1">点击上传</span></>}
+          </button>
+        </div>
+
+        <button onClick={submit} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/30 active:scale-[0.98]">
+          提交（+10 积分）
+        </button>
+        <p className="text-[11px] text-center text-muted-foreground">提交成功后，审核通过会展示在首页</p>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mb-1.5">
+        {label}{required && <span className="text-destructive ml-0.5">*</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* =================== Report =================== */
+
+const REPORT_REASONS = ["有人在室内吸烟", "有明显烟味", "没有无烟标志", "工作人员未劝阻", "其他问题"];
+
+function ReportPage({ place, onBack }: { place: Place; onBack: () => void; }) {
+  const [reason, setReason] = useState("");
+  const [text, setText] = useState("");
+  const [hasImg, setHasImg] = useState(false);
+  const submit = () => {
+    if (!reason) { toast.error("请选择举报原因"); return; }
+    toast.success("举报提交成功，感谢你帮助改善无烟环境 🌿");
+    onBack();
+  };
+  return (
+    <div>
+      <TopBar title="举报吸烟问题" onBack={onBack} />
+      <div className="p-4 space-y-3">
+        <div className="bg-primary-soft text-primary rounded-2xl p-3 text-sm flex items-center gap-2">
+          <MapPin className="w-4 h-4" />{place.name}
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-sm font-medium mb-3">举报原因</div>
+          <div className="space-y-2">
+            {REPORT_REASONS.map(r => (
+              <button key={r} onClick={() => setReason(r)}
+                className={`w-full h-11 rounded-xl text-sm flex items-center justify-between px-3 border transition ${
+                  reason === r ? "bg-primary-soft border-primary text-primary" : "bg-background border-border"
+                }`}>
+                <span>{r}</span>
+                {reason === r && <Check className="w-4 h-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
+        <textarea value={text} onChange={e => setText(e.target.value)}
+          placeholder="补充描述（可选）"
+          className="w-full min-h-[100px] rounded-2xl bg-card border border-border p-3 text-sm outline-none focus:border-primary" />
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-sm font-medium mb-2">图片证据（可选）</div>
+          <button onClick={() => { setHasImg(true); toast.success("图片已添加"); }}
+            className={`w-full aspect-[4/3] rounded-xl border border-dashed flex flex-col items-center justify-center text-muted-foreground ${hasImg ? "bg-primary-soft border-primary text-primary" : "bg-secondary border-border"}`}>
+            {hasImg ? <Check className="w-6 h-6" /> : <Camera className="w-6 h-6" />}
+            <span className="text-xs mt-1">{hasImg ? "已上传" : "点击上传"}</span>
+          </button>
+        </div>
+        <button onClick={submit} className="w-full h-12 rounded-2xl bg-destructive text-destructive-foreground font-semibold active:scale-[0.98]">提交举报</button>
+      </div>
+    </div>
+  );
+}
+
+/* =================== Correction =================== */
+
+const CORRECTION_REASONS = ["地址错误", "电话错误", "营业时间错误", "场所类型错误", "其他信息错误"];
+
+function CorrectionPage({ place, onBack }: { place: Place; onBack: () => void; }) {
+  const [reason, setReason] = useState("");
+  const [text, setText] = useState("");
+  const submit = () => {
+    if (!reason) { toast.error("请选择纠错类型"); return; }
+    toast.success("纠错提交成功，我们会尽快核实");
+    onBack();
+  };
+  return (
+    <div>
+      <TopBar title="纠错场所信息" onBack={onBack} />
+      <div className="p-4 space-y-3">
+        <div className="bg-primary-soft text-primary rounded-2xl p-3 text-sm flex items-center gap-2">
+          <MapPin className="w-4 h-4" />{place.name}
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-sm font-medium mb-3">纠错类型</div>
+          <div className="space-y-2">
+            {CORRECTION_REASONS.map(r => (
+              <button key={r} onClick={() => setReason(r)}
+                className={`w-full h-11 rounded-xl text-sm flex items-center justify-between px-3 border ${
+                  reason === r ? "bg-primary-soft border-primary text-primary" : "bg-background border-border"
+                }`}>
+                <span>{r}</span>
+                {reason === r && <Check className="w-4 h-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
+        <textarea value={text} onChange={e => setText(e.target.value)}
+          placeholder="补充正确信息（可选）"
+          className="w-full min-h-[100px] rounded-2xl bg-card border border-border p-3 text-sm outline-none focus:border-primary" />
+        <button onClick={submit} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold active:scale-[0.98]">提交纠错</button>
+      </div>
+    </div>
+  );
+}
+
+/* =================== Help Center =================== */
+
+const FAQ = [
+  { q: "空气评分怎么算？", a: "空气评分根据无烟标志、是否有人吸烟、空气是否有烟味、工作人员是否劝阻综合计算，满分 5 分。" },
+  { q: "写评价可以获得多少积分？", a: "提交一条有效评价可获得 5 积分。" },
+  { q: "发笔记可以获得多少积分？", a: "发布一条带图片的笔记可获得 10 积分。" },
+  { q: "添加新场所可以获得多少积分？", a: "提交一个新场所可获得 10 积分，审核通过后展示在首页。" },
+  { q: "钱包余额是什么？", a: "Demo 阶段钱包余额等于账户积分，用于展示后续链上钱包联动方向。" },
+  { q: "发现有人吸烟怎么办？", a: "可以在场所详情页点击「举报吸烟问题」提交反馈。" },
+];
+
+function HelpPage({ onBack }: { onBack: () => void }) {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <div>
+      <TopBar title="帮助中心" onBack={onBack} />
+      <div className="p-4 space-y-2">
+        <div className="bg-gradient-to-r from-primary to-primary-glow text-primary-foreground rounded-2xl p-4 mb-2">
+          <div className="font-semibold flex items-center gap-2"><HelpCircle className="w-4 h-4" />常见问题</div>
+          <p className="text-xs opacity-90 mt-1">关于空气点评的使用与积分玩法</p>
+        </div>
+        {FAQ.map((f, i) => (
+          <div key={i} className="bg-card border border-border rounded-2xl overflow-hidden">
+            <button onClick={() => setOpen(open === i ? null : i)} className="w-full flex items-center justify-between p-4 text-left">
+              <span className="text-sm font-medium pr-3">{f.q}</span>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${open === i ? "rotate-180" : ""}`} />
+            </button>
+            {open === i && (
+              <div className="px-4 pb-4 text-xs text-muted-foreground leading-relaxed">{f.a}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =================== Settings =================== */
+
+const CITIES = ["上海市 静安区", "上海市 徐汇区", "上海市 浦东新区", "北京市 朝阳区", "深圳市 南山区", "杭州市 西湖区"];
+
+function SettingsPage({ fontSize, setFontSize, city, setCity, notifyOn, setNotifyOn, onBack }: {
+  fontSize: FontSize; setFontSize: (f: FontSize) => void;
+  city: string; setCity: (c: string) => void;
+  notifyOn: boolean; setNotifyOn: (v: boolean) => void;
+  onBack: () => void;
+}) {
+  const [showCity, setShowCity] = useState(false);
+  return (
+    <div>
+      <TopBar title="设置" onBack={onBack} />
+      <div className="p-4 space-y-3">
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-sm font-medium mb-3 flex items-center gap-1.5"><TypeIcon className="w-4 h-4 text-primary" />字体大小</div>
+          <div className="flex gap-2">
+            {([["standard", "标准"], ["large", "大号"], ["xlarge", "超大"]] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setFontSize(k)}
+                className={`flex-1 h-10 rounded-xl text-sm border ${fontSize === k ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border"}`}>{l}</button>
+            ))}
+          </div>
+          <div className="text-xs text-muted-foreground mt-2">效果会立即应用到全 App</div>
+        </div>
+
+        <button onClick={() => setShowCity(true)} className="w-full bg-card border border-border rounded-2xl p-4 flex items-center justify-between active:bg-secondary">
+          <span className="text-sm font-medium flex items-center gap-1.5"><MapPinned className="w-4 h-4 text-primary" />城市切换</span>
+          <span className="text-xs text-muted-foreground flex items-center gap-1">{city}<ChevronRight className="w-4 h-4" /></span>
+        </button>
+
+        <div className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between">
+          <span className="text-sm font-medium flex items-center gap-1.5"><Bell className="w-4 h-4 text-primary" />消息提醒</span>
+          <button onClick={() => setNotifyOn(!notifyOn)}
+            className={`relative w-11 h-6 rounded-full transition ${notifyOn ? "bg-primary" : "bg-border"}`}>
+            <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-card shadow transition-all ${notifyOn ? "left-5" : "left-0.5"}`} />
+          </button>
+        </div>
+
+        <button onClick={() => toast.success("缓存已清除")} className="w-full bg-card border border-border rounded-2xl p-4 flex items-center justify-between active:bg-secondary">
+          <span className="text-sm font-medium flex items-center gap-1.5"><Trash2 className="w-4 h-4 text-primary" />清除缓存</span>
+          <span className="text-xs text-muted-foreground">2.4 MB</span>
+        </button>
+
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-sm font-medium mb-2 flex items-center gap-1.5"><Wind className="w-4 h-4 text-primary" />关于空气点评</div>
+          <p className="text-xs text-muted-foreground leading-relaxed">空气点评是一个聚焦城市公共场所无烟环境的轻量级公益评价产品，让每一次呼吸都更清新。</p>
+          <p className="text-[11px] text-muted-foreground mt-2">版本 v1.0 Demo</p>
+        </div>
+      </div>
+
+      {showCity && (
+        <div className="absolute inset-0 z-50 bg-black/40 flex items-end" onClick={() => setShowCity(false)}>
+          <div onClick={e => e.stopPropagation()} className="w-full bg-card rounded-t-3xl p-4 max-h-[60%] overflow-y-auto">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-semibold">选择城市</span>
+              <button onClick={() => setShowCity(false)}><X className="w-4 h-4 text-muted-foreground" /></button>
+            </div>
+            <div className="space-y-1">
+              {CITIES.map(c => (
+                <button key={c} onClick={() => { setCity(c); setShowCity(false); toast.success(`已切换到 ${c}`); }}
+                  className={`w-full h-12 rounded-xl text-sm flex items-center justify-between px-3 ${c === city ? "bg-primary-soft text-primary" : "active:bg-secondary"}`}>
+                  <span>{c}</span>
+                  {c === city && <Check className="w-4 h-4" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =================== Demo Showcase =================== */
+
+const DEMO_STEPS = [
+  { icon: Coffee, title: "想找个空气清爽的咖啡馆", desc: "用户在午休时打开空气点评。" },
+  { icon: MapPin, title: "查看附近无烟场所", desc: "首页展示按距离推荐的场所卡片。" },
+  { icon: Wind, title: "进入详情查看无烟评分", desc: "评分由 4 个维度自动计算，状态一目了然。" },
+  { icon: Award, title: "提交评价获得积分", desc: "每条评价 +5，每条笔记 +10，提交新场所 +10。" },
+  { icon: Trophy, title: "查看无烟排行榜", desc: "为城市最清新的空气投上一票。" },
+  { icon: Wallet, title: "积分等于钱包余额", desc: "为下一步链上钱包联动留出入口。" },
+];
+
+function DemoShowcase({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="min-h-full bg-gradient-to-b from-primary-soft to-background">
+      <div className="sticky top-0 bg-background/90 backdrop-blur border-b border-border h-12 flex items-center px-3 z-10">
+        <button onClick={onBack} className="p-1"><ArrowLeft className="w-5 h-5" /></button>
+        <div className="flex-1 text-center text-base font-semibold flex items-center justify-center gap-1.5">
+          <Sparkles className="w-4 h-4 text-accent" /> Demo 演示
+        </div>
+        <span className="w-7" />
+      </div>
+
+      <div className="p-4">
+        <div className="bg-gradient-to-br from-primary to-primary-glow text-primary-foreground rounded-2xl p-5 shadow-lg shadow-primary/30">
+          <div className="text-xs opacity-90">空气点评 · 完整产品路径</div>
+          <div className="text-xl font-bold mt-1">让每一次呼吸都更清新 🌿</div>
+          <div className="text-xs opacity-90 mt-2">下面是用户从打开 App 到获得积分的完整旅程</div>
+        </div>
+
+        <div className="mt-5 relative">
+          <div className="absolute left-[22px] top-2 bottom-2 w-0.5 bg-primary/20" />
+          <div className="space-y-3">
+            {DEMO_STEPS.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <div key={i} className="flex gap-3 items-start">
+                  <div className="w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-md shadow-primary/30 z-10">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 bg-card border border-border rounded-2xl p-3 shadow-sm">
+                    <div className="text-[11px] text-primary font-medium">Step {i + 1}</div>
+                    <div className="text-sm font-semibold mt-0.5">{s.title}</div>
+                    <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{s.desc}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <button onClick={onBack} className="mt-6 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/30">
+          返回 App 继续体验
+        </button>
+        <p className="text-center text-[11px] text-muted-foreground mt-3 pb-6">空气点评 · Demo Day</p>
+      </div>
     </div>
   );
 }
