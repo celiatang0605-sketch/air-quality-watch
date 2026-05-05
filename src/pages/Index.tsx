@@ -953,22 +953,35 @@ function ReviewCard({ r }: { r: ReviewItem }) {
   );
 }
 
-function NoteCard({ n }: { n: NoteItem }) {
+function NoteCard({ n, onLike, onCollect }: { n: NoteItem; onLike?: () => void; onCollect?: () => void }) {
   return (
     <div className="bg-card border border-border rounded-2xl p-3 shadow-sm">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-sm">{n.avatar}</div>
-        <div className="flex-1 text-sm font-medium">{n.user}</div>
-        <div className="text-[11px] text-muted-foreground">{n.time}</div>
+        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm">{n.avatar}</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium truncate">{n.user}</div>
+          <div className="text-[11px] text-muted-foreground">{n.time}</div>
+        </div>
+        {n.pointAward && <span className="text-[10px] text-accent bg-accent-soft px-1.5 py-0.5 rounded">+{n.pointAward} 积分</span>}
       </div>
-      <img src={n.cover} alt={n.placeName} className="w-full aspect-[16/10] rounded-xl object-cover mb-2 bg-secondary" />
+      <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-2">
+        <MapPin className="w-3 h-3 shrink-0" />
+        <span className="truncate">{n.placeName} · {n.placeType}{n.placeArea ? ` · ${n.placeArea}` : ""}</span>
+      </div>
+      <PlaceImg src={n.cover} type={n.placeType} alt={n.placeName} className="w-full aspect-[16/10] rounded-xl object-cover mb-2 bg-secondary" />
       <p className="text-sm leading-relaxed">{n.text}</p>
-      <div className="mt-1 flex flex-wrap gap-1">
-        {n.tags.map(t => <span key={t} className="text-[10px] text-primary bg-primary-soft px-1.5 py-0.5 rounded"># {t}</span>)}
+      <div className="mt-1.5 flex flex-wrap gap-1">
+        {n.tags.map(t => <span key={t} className="text-[10px] text-primary bg-primary-soft px-2 py-0.5 rounded-full">#{t}</span>)}
       </div>
-      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{n.placeName} · {n.placeType}</span>
-        {n.pointAward && <span className="text-accent font-medium">+{n.pointAward} 积分</span>}
+      <div className="mt-2 flex items-center justify-end gap-3 text-[12px] text-muted-foreground">
+        <button onClick={(e) => { e.stopPropagation(); onLike?.(); }} className="flex items-center gap-1 active:scale-95 transition">
+          <ThumbsUp className={`w-4 h-4 ${n.isLiked ? "fill-primary text-primary" : ""}`} />
+          <span className={n.isLiked ? "text-primary" : ""}>{n.likes ?? 0}</span>
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onCollect?.(); }} className="flex items-center gap-1 active:scale-95 transition">
+          <Bookmark className={`w-4 h-4 ${n.isCollected ? "fill-accent text-accent" : ""}`} />
+          <span className={n.isCollected ? "text-accent" : ""}>收藏</span>
+        </button>
       </div>
     </div>
   );
