@@ -536,7 +536,12 @@ export default function Index() {
             />
           )}
           {page === "myNotes" && (
-            <MyNotesPage notes={myNotes} onGoNote={() => setPage("note")} />
+            <NotesPlazaPage
+              notes={allNotes}
+              onGoNote={() => setPage("note")}
+              onToggleLike={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isLiked: !n.isLiked, likes: (n.likes || 0) + (n.isLiked ? -1 : 1) } : n))}
+              onToggleCollect={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isCollected: !n.isCollected } : n))}
+            />
           )}
           {page === "addPlace" && (
             <AddPlacePage
