@@ -42,8 +42,12 @@ type NoteItem = {
   tags: string[];
   cover: string; // image url
   placeName: string;
-  placeType: string;
+  placeType: Exclude<Category, "全部">;
+  placeArea?: string;
   pointAward?: number;
+  likes?: number;
+  isLiked?: boolean;
+  isCollected?: boolean;
 };
 
 type Place = {
