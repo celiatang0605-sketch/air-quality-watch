@@ -181,10 +181,14 @@ const MOCK_PLACES: Place[] = [
 ];
 
 type Page =
-  | "login" | "home" | "list" | "detail" | "review" | "note"
-  | "rank" | "me" | "wallet" | "favorites" | "history" | "points";
+  | "login" | "home" | "list" | "search" | "category" | "detail" | "review" | "note"
+  | "rank" | "me" | "wallet" | "favorites" | "history" | "points"
+  | "addPlace" | "report" | "correction" | "help" | "settings" | "demo";
 
 type Tab = "home" | "rank" | "publish" | "me";
+
+type SortKey = "default" | "distance" | "score" | "reviews" | "smoke";
+type FontSize = "standard" | "large" | "xlarge";
 
 type PointLog = { id: string; type: string; value: number; time: string };
 
