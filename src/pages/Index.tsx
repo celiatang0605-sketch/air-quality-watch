@@ -602,9 +602,9 @@ export default function Index() {
           {page === "withdraw" && (
             <WithdrawPage
               points={points} address={walletAddress}
-              onConnect={connectWallet}
-              onSwitchWallet={() => { setWalletAddress(""); setTimeout(connectWallet, 100); }}
-              onSubmit={submitWithdraw}
+              onConnect={() => { void connectWallet(); }}
+              onSwitchWallet={() => { setWalletAddress(""); setTimeout(() => { void connectWallet(); }, 100); }}
+              onSubmit={(amount) => { void submitWithdraw(amount); }}
               records={withdraws}
               onBack={() => setPage("me")}
             />
