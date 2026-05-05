@@ -1350,22 +1350,80 @@ function NotePage({ places, initialPlaceId, onBack, onSubmit }: {
   );
 }
 
-/* =================== My Notes =================== */
+/* =================== Notes Plaza =================== */
 
-function MyNotesPage({ notes, onGoNote }: { notes: NoteItem[]; onGoNote: () => void; }) {
+const NOTE_FILTERS = ["全部", "无烟友好", "有烟味反馈", "禁烟标志", "店员劝阻", "图片笔记"] as const;
+type NoteFilter = typeof NOTE_FILTERS[number];
+
+function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
+  notes: NoteItem[]; onGoNote: () => void;
+  onToggleLike: (id: string) => void; onToggleCollect: (id: string) => void;
+}) {
+  const [kw, setKw] = useState("");
+  const [filter, setFilter] = useState<NoteFilter>("全部");
+
+  const list = useMemo(() => {
+    let arr = notes;
+    if (filter === "图片笔记") arr = arr.filter(n => !!n.cover);
+    else if (filter !== "全部") arr = arr.filter(n => n.tags.includes(filter));
+    if (kw.trim()) {
+      const k = kw.trim().toLowerCase();
+      arr = arr.filter(n =>
+        n.placeName.toLowerCase().includes(k) ||
+        n.text.toLowerCase().includes(k) ||
+        n.tags.some(t => t.toLowerCase().includes(k)) ||
+        n.user.toLowerCase().includes(k)
+      );
+    }
+    return arr;
+  }, [notes, filter, kw]);
+
   return (
     <div>
-      <TopBar title="我的笔记" />
+      <div className="px-4 pt-5 pb-3 bg-gradient-to-b from-primary-soft to-background">
+        <h1 className="text-xl font-bold">笔记</h1>
+        <p className="text-xs text-muted-foreground mt-1">看看大家分享的场所空气体验</p>
+        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl border border-border px-3 h-11">
+          <Search className="w-4 h-4 text-muted-foreground" />
+          <input
+            value={kw}
+            onChange={(e) => setKw(e.target.value)}
+            placeholder="搜索场所、关键词、空气体验"
+            className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+          />
+          {kw && <button onClick={() => setKw("")}><X className="w-4 h-4 text-muted-foreground" /></button>}
+        </div>
+        <div className="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar">
+          {NOTE_FILTERS.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`shrink-0 px-3 h-8 rounded-full text-xs border transition ${
+                filter === f
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-foreground border-border"
+              }`}>{f}</button>
+          ))}
+        </div>
+      </div>
+
       <div className="p-4 space-y-3">
-        {notes.length === 0 ? (
+        {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <FileText className="w-12 h-12 text-muted-foreground opacity-40 mb-3" />
-            <p className="text-sm text-muted-foreground max-w-[260px]">你还没有发布笔记，去分享一次场所空气体验吧</p>
+            <p className="text-sm text-muted-foreground max-w-[280px]">
+              {notes.length === 0
+                ? "还没有人发布笔记，快来分享第一条场所空气体验吧"
+                : "没有匹配的笔记，换个关键词或筛选试试"}
+            </p>
             <button onClick={onGoNote} className="mt-5 h-11 px-6 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/30">
               去发笔记
             </button>
           </div>
-        ) : notes.map(n => <NoteCard key={n.id} n={n} />)}
+        ) : list.map(n => (
+          <NoteCard key={n.id} n={n}
+            onLike={() => onToggleLike(n.id)}
+            onCollect={() => onToggleCollect(n.id)}
+          />
+        ))}
       </div>
     </div>
   );
