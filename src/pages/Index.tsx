@@ -1291,7 +1291,7 @@ function NotePage({ places, initialPlaceId, onBack, onSubmit }: {
               {places.map(p => (
                 <button key={p.id} onClick={() => { setPlaceId(p.id); setShowPicker(false); }}
                   className={`w-full p-3 rounded-xl flex items-center gap-3 text-left ${placeId === p.id ? "bg-primary-soft" : "active:bg-secondary"}`}>
-                  <img src={p.img} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                  <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-lg object-cover" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{p.name}</div>
                     <div className="text-[11px] text-muted-foreground">{p.type} · {p.address}</div>
