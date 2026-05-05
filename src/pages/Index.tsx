@@ -209,6 +209,13 @@ export default function Index() {
   ]);
   const [places, setPlaces] = useState<Place[]>(MOCK_PLACES);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [city, setCity] = useState("上海市 静安区");
+  const [fontSize, setFontSize] = useState<FontSize>("standard");
+  const [notifyOn, setNotifyOn] = useState(true);
+  const [searchSort, setSearchSort] = useState<SortKey>("default");
+  const [catSort, setCatSort] = useState<SortKey>("default");
+
+  const fontClass = fontSize === "large" ? "text-[17px]" : fontSize === "xlarge" ? "text-[19px]" : "text-[15px]";
 
   // sync activePlace when places list updates
   useEffect(() => {
