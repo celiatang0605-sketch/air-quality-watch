@@ -1629,7 +1629,7 @@ function HistoryPage({ items, onPlace, onClear, onBack }: {
           <EmptyState icon={Eye} text="你还没有浏览记录" />
         ) : items.map(({ place, time }) => (
           <button key={place.id + time} onClick={() => onPlace(place)} className="w-full bg-card border border-border rounded-2xl p-3 flex items-center gap-3 text-left active:scale-[0.99] transition">
-            <img src={place.img} alt="" className="w-12 h-12 rounded-xl object-cover bg-secondary" />
+            <PlaceImg src={place.img} type={place.type} className="w-12 h-12 rounded-xl object-cover bg-secondary" />
             <div className="flex-1 min-w-0">
               <div className="font-medium text-sm truncate">{place.name}</div>
               <div className="text-[11px] text-muted-foreground mt-0.5">{place.type} · 浏览于 {time}</div>
