@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { connectPhantom, exchangePoints, getPhantom, POINTS_PER_EXCHANGE } from "@/lib/solana/exchange";
 import {
   MapPin, Search, Wind, Heart, Bookmark, Bell, ChevronRight,
   Home, Trophy, PlusCircle, User, Coffee, Utensils, ShoppingBag, Hotel,
@@ -408,30 +409,55 @@ export default function Index() {
     setPage("home"); setTab("home");
   };
 
-  const connectWallet = async () => {
-    if (typeof window === "undefined" || !window.ethereum) {
-      toast.error("请先安装 MetaMask 钱包后再连接");
-      return;
-    }
+  const connectWallet = async (silent = false): Promise<string> => {
     try {
-      const accounts: string[] = await window.ethereum.request({ method: "eth_requestAccounts" });
-      if (accounts && accounts[0]) {
-        setWalletAddress(accounts[0]);
-        toast.success("钱包连接成功");
-      }
+      const addr = await connectPhantom();
+      setWalletAddress(addr);
+      if (!silent) toast.success("Phantom 钱包连接成功");
+      return addr;
     } catch (e) {
-      toast.error("钱包连接已取消");
+      const msg = e instanceof Error ? e.message : "钱包连接失败";
+      if (!silent) toast.error(msg);
+      return "";
     }
   };
 
-  const submitWithdraw = (amount: number) => {
-    if (!walletAddress) { toast.error("请先连接 MetaMask 钱包"); return; }
+  const submitWithdraw = async (amount: number) => {
+    let addr = walletAddress;
+    if (!addr) {
+      addr = await connectWallet();
+      if (!addr) return;
+    }
     if (!amount) { toast.error("请输入提现积分数量"); return; }
     if (amount > points) { toast.error("提现积分不能超过当前可用积分"); return; }
-    setPoints(v => v - amount);
-    setPointLogs(l => [{ id: rid(), type: "提现申请", value: -amount, time: nowLabel() }, ...l]);
-    setWithdraws(w => [{ id: rid(), amount, address: walletAddress, time: nowLabel(), status: "待处理" }, ...w]);
-    toast.success("提现申请已提交，请等待处理");
+    if (amount < POINTS_PER_EXCHANGE) {
+      toast.error(`最少 ${POINTS_PER_EXCHANGE} 积分起兑（${POINTS_PER_EXCHANGE} 积分 = 0.001 AVAX）`);
+      return;
+    }
+
+    const phantom = getPhantom();
+    if (!phantom) { toast.error("未检测到 Phantom 钱包"); return; }
+
+    const exchanges = Math.floor(amount / POINTS_PER_EXCHANGE);
+    const usePoints = exchanges * POINTS_PER_EXCHANGE;
+
+    const t = toast.loading("正在调用智能合约，请在钱包中确认...");
+    try {
+      let lastSig = "";
+      for (let i = 0; i < exchanges; i++) {
+        lastSig = await exchangePoints(phantom);
+      }
+      setPoints(v => v - usePoints);
+      setPointLogs(l => [{ id: rid(), type: `链上兑换 AVAX`, value: -usePoints, time: nowLabel() }, ...l]);
+      setWithdraws(w => [{
+        id: rid(), amount: usePoints, address: addr, time: nowLabel(),
+        status: `已上链 (${(exchanges * 0.001).toFixed(3)} AVAX)`,
+      }, ...w]);
+      toast.success(`兑换成功！签名 ${lastSig.slice(0, 8)}...`, { id: t });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "兑换失败";
+      toast.error(`链上交易失败：${msg}`, { id: t });
+    }
   };
 
   const showBottomTab = ["home", "rank", "publish", "myNotes", "me"].includes(page);
@@ -576,9 +602,9 @@ export default function Index() {
           {page === "withdraw" && (
             <WithdrawPage
               points={points} address={walletAddress}
-              onConnect={connectWallet}
-              onSwitchWallet={() => { setWalletAddress(""); setTimeout(connectWallet, 100); }}
-              onSubmit={submitWithdraw}
+              onConnect={() => { void connectWallet(); }}
+              onSwitchWallet={() => { setWalletAddress(""); setTimeout(() => { void connectWallet(); }, 100); }}
+              onSubmit={(amount) => { void submitWithdraw(amount); }}
               records={withdraws}
               onBack={() => setPage("me")}
             />
@@ -1614,7 +1640,6 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
 
   const submit = () => {
     const n = parseInt(amount || "0", 10);
-    if (!address) { toast.error("请先连接 MetaMask 钱包"); return; }
     if (!n) { toast.error("请输入提现积分数量"); return; }
     if (n > points) { toast.error("提现积分不能超过当前可用积分"); return; }
     onSubmit(n);
@@ -1623,12 +1648,19 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
 
   return (
     <div className="pb-10">
-      <TopBar title="提现" onBack={onBack} />
+      <TopBar title="提现兑换 AVAX" onBack={onBack} />
       <div className="p-4 space-y-4">
         <div className="rounded-2xl p-5 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg shadow-primary/30">
           <div className="text-xs opacity-90">当前可提现积分</div>
           <div className="text-4xl font-bold mt-1">{points}</div>
-          <div className="text-xs opacity-90 mt-2">积分可提现至已连接的钱包地址</div>
+          <div className="text-xs opacity-90 mt-2">兑换比率：1000 积分 = 0.001 AVAX</div>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-3 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-foreground font-medium mb-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" /> 已接入 Solana 智能合约（Devnet）
+          </div>
+          <div className="font-mono break-all">Program: Hs768q1NX1...AakqX1</div>
         </div>
 
         {/* 钱包连接 */}
@@ -1638,9 +1670,9 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
               <Wallet className="w-6 h-6" />
             </div>
             <div className="text-sm font-medium">未连接钱包</div>
-            <p className="text-xs text-muted-foreground mt-1 mb-3">连接钱包后可发起提现</p>
+            <p className="text-xs text-muted-foreground mt-1 mb-3">连接 Phantom 钱包后可发起链上兑换</p>
             <button onClick={onConnect} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold active:scale-[0.98]">
-              连接 MetaMask 钱包
+              连接 Phantom 钱包
             </button>
           </div>
         ) : (
@@ -1660,29 +1692,34 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
 
         {/* 提现金额 */}
         <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="text-sm font-medium mb-2">提现积分</div>
+          <div className="text-sm font-medium mb-2">提现积分（最少 1000 起兑）</div>
           <div className="flex items-center gap-2">
             <input value={amount} onChange={e => setAmount(e.target.value.replace(/\D/g, ""))}
               placeholder="请输入提现积分数量"
               className="flex-1 h-11 bg-secondary rounded-xl px-3 text-sm outline-none" />
-            <button onClick={() => setAmount(String(points))} className="h-11 px-3 rounded-xl bg-primary-soft text-primary text-xs font-medium shrink-0">
-              全部提现
+            <button onClick={() => setAmount(String(Math.floor(points / 1000) * 1000))} className="h-11 px-3 rounded-xl bg-primary-soft text-primary text-xs font-medium shrink-0">
+              全部兑换
             </button>
           </div>
+          {amount && parseInt(amount, 10) >= 1000 && (
+            <div className="text-[11px] text-muted-foreground mt-2">
+              预计获得 {(Math.floor(parseInt(amount, 10) / 1000) * 0.001).toFixed(3)} AVAX
+            </div>
+          )}
         </div>
 
         <button onClick={submit} className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/30 active:scale-[0.98]">
-          确认提现
+          {address ? "确认兑换" : "连接钱包并兑换"}
         </button>
 
         {records.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold mt-2 mb-2">提现记录</h3>
+            <h3 className="text-sm font-semibold mt-2 mb-2">兑换记录</h3>
             <div className="bg-card border border-border rounded-2xl divide-y divide-border/60">
               {records.map(r => (
                 <div key={r.id} className="px-4 py-3 flex items-center">
                   <div className="flex-1">
-                    <div className="text-sm font-medium">提现 {r.amount} 积分</div>
+                    <div className="text-sm font-medium">兑换 {r.amount} 积分</div>
                     <div className="text-[11px] text-muted-foreground mt-0.5">{shortAddr(r.address)} · {r.time}</div>
                   </div>
                   <span className="text-xs text-accent bg-accent-soft px-2 py-0.5 rounded">{r.status}</span>
