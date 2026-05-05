@@ -307,7 +307,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6">
+    <div className={`min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6 ${fontClass}`}>
       <div className="relative w-full sm:max-w-[390px] min-h-screen sm:min-h-[844px] sm:rounded-[2.5rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
         <div className="hidden sm:flex h-7 items-center justify-between px-6 text-[11px] text-foreground/70 bg-background">
           <span>9:41</span>
@@ -315,15 +315,26 @@ export default function Index() {
           <span>100%</span>
         </div>
 
+        {page !== "login" && page !== "demo" && (
+          <button
+            onClick={() => setPage("demo")}
+            className="absolute top-2 right-3 z-30 text-[10px] px-2 py-1 rounded-full bg-accent text-accent-foreground shadow-md flex items-center gap-1"
+          >
+            <Sparkles className="w-3 h-3" /> Demo 演示
+          </button>
+        )}
+
         <div className="flex-1 overflow-y-auto pb-24">
           {page === "login" && <Login onLogin={() => { setPage("home"); setTab("home"); setShowOnboarding(true); toast.success("登录成功，欢迎来到空气点评"); }} />}
           {page === "home" && (
             <HomePage
               search={search} setSearch={setSearch}
-              filterCat={filterCat} setFilterCat={(c) => { setFilterCat(c); setPage("list"); }}
+              city={city}
+              filterCat={filterCat} setFilterCat={(c) => { setFilterCat(c); setPage("category"); }}
               places={places.slice(0, 6)} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onSeeAll={() => setPage("list")}
+              onSearchSubmit={() => setPage("search")}
             />
           )}
           {page === "list" && (
@@ -331,6 +342,26 @@ export default function Index() {
               filterCat={filterCat} setFilterCat={setFilterCat}
               search={search} setSearch={setSearch}
               places={filtered} onPlace={goPlace}
+              favorites={favorites} onFav={toggleFav}
+              onBack={() => setPage("home")}
+            />
+          )}
+          {page === "search" && (
+            <SearchPage
+              search={search} setSearch={setSearch}
+              sort={searchSort} setSort={setSearchSort}
+              places={places} onPlace={goPlace}
+              favorites={favorites} onFav={toggleFav}
+              onBack={() => setPage("home")}
+              onAdd={() => setPage("addPlace")}
+            />
+          )}
+          {page === "category" && (
+            <CategoryPage
+              cat={filterCat === "全部" ? "餐厅" : filterCat as Exclude<Category, "全部">}
+              setCat={(c) => setFilterCat(c)}
+              sort={catSort} setSort={setCatSort}
+              places={places} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onBack={() => setPage("home")}
             />
@@ -343,6 +374,8 @@ export default function Index() {
               onBack={() => setPage("home")}
               onReview={() => setPage("review")}
               onNote={() => setPage("note")}
+              onReport={() => setPage("report")}
+              onCorrection={() => setPage("correction")}
             />
           )}
           {page === "review" && (
@@ -359,16 +392,33 @@ export default function Index() {
               onSubmit={submitNote}
             />
           )}
+          {page === "addPlace" && (
+            <AddPlacePage
+              city={city}
+              onBack={() => setPage(tab === "publish" ? "home" : "home")}
+              onSubmit={submitNewPlace}
+            />
+          )}
+          {page === "report" && activePlace && (
+            <ReportPage place={activePlace} onBack={() => setPage("detail")} />
+          )}
+          {page === "correction" && activePlace && (
+            <CorrectionPage place={activePlace} onBack={() => setPage("detail")} />
+          )}
           {page === "rank" && (
             <RankPage places={places} onPlace={goPlace} favorites={favorites} onFav={toggleFav} />
           )}
           {page === "me" && (
             <MePage
               points={points} favCount={favorites.length} historyCount={history.length}
+              city={city}
               onWallet={() => setPage("wallet")}
               onPoints={() => setPage("points")}
               onFavorites={() => setPage("favorites")}
               onHistory={() => setPage("history")}
+              onAddPlace={() => setPage("addPlace")}
+              onHelp={() => setPage("help")}
+              onSettings={() => setPage("settings")}
               onLogout={() => { setPage("login"); toast("已退出登录"); }}
             />
           )}
@@ -392,9 +442,19 @@ export default function Index() {
               onBack={() => setPage("me")}
             />
           )}
+          {page === "help" && <HelpPage onBack={() => setPage("me")} />}
+          {page === "settings" && (
+            <SettingsPage
+              fontSize={fontSize} setFontSize={setFontSize}
+              city={city} setCity={setCity}
+              notifyOn={notifyOn} setNotifyOn={setNotifyOn}
+              onBack={() => setPage("me")}
+            />
+          )}
+          {page === "demo" && <DemoShowcase onBack={() => setPage("home")} />}
         </div>
 
-        {page !== "login" && <BottomTab tab={tab} onChange={goTab} />}
+        {page !== "login" && page !== "demo" && <BottomTab tab={tab} onChange={goTab} />}
         {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
       </div>
     </div>
