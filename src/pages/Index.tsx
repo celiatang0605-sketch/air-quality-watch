@@ -81,10 +81,10 @@ const TYPE_IMG: Record<Exclude<Category, "全部">, string> = {
   "商场": "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=400&q=70&auto=format&fit=crop",
   "酒店": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=70&auto=format&fit=crop",
   "电影院": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=70&auto=format&fit=crop",
-  "KTV": "https://images.unsplash.com/photo-1571266028243-d220bc8e8df7?w=400&q=70&auto=format&fit=crop",
+  "KTV": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&q=70&auto=format&fit=crop",
   "健身房": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=70&auto=format&fit=crop",
   "书店": "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&q=70&auto=format&fit=crop",
-  "奶茶店": "https://images.unsplash.com/photo-1558857563-c0c6ee6ff8a3?w=400&q=70&auto=format&fit=crop",
+  "奶茶店": "https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400&q=70&auto=format&fit=crop",
   "写字楼": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70&auto=format&fit=crop",
 };
 
