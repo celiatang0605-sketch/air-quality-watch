@@ -567,21 +567,26 @@ function PlaceCard({ p, fav, onFav, onClick }: { p: Place; fav: boolean; onFav: 
 
 function HomePage(props: {
   search: string; setSearch: (v: string) => void;
+  city?: string;
   filterCat: Category; setFilterCat: (c: Category) => void;
   places: Place[]; onPlace: (p: Place) => void;
   favorites: number[]; onFav: (id: number) => void;
   onSeeAll: () => void;
+  onSearchSubmit?: () => void;
 }) {
   return (
     <div>
       <div className="bg-gradient-to-b from-primary-soft to-background px-4 pt-4 pb-3">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-1 text-foreground font-medium">
-            <MapPin className="w-4 h-4 text-primary" /> 上海市 静安区 <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <MapPin className="w-4 h-4 text-primary" /> {props.city || "上海市 静安区"} <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
           <Bell className="w-5 h-5 text-muted-foreground" />
         </div>
-        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl px-3 h-10 border border-border/60 shadow-sm">
+        <form
+          onSubmit={(e) => { e.preventDefault(); props.onSearchSubmit?.(); }}
+          className="mt-3 flex items-center gap-2 bg-card rounded-2xl px-3 h-10 border border-border/60 shadow-sm"
+        >
           <Search className="w-4 h-4 text-muted-foreground" />
           <input
             value={props.search}
@@ -589,7 +594,10 @@ function HomePage(props: {
             placeholder="搜索餐厅、咖啡馆、商场"
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
-        </div>
+          {props.search && (
+            <button type="submit" className="text-xs text-primary font-medium">搜索</button>
+          )}
+        </form>
       </div>
 
       <div className="px-2 py-3 overflow-x-auto">
