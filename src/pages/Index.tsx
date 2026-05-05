@@ -1114,10 +1114,10 @@ function ReviewPage({ place, city, onBack, onSubmit }: {
           </Field>
         </div>
 
-        <ChoiceRow label="是否看到无烟标志" options={["有", "无"] as const} value={sign} onChange={setSign} />
-        <ChoiceRow label="是否有人吸烟" options={["有", "无"] as const} value={smoker} onChange={setSmoker} />
-        <ChoiceRow label="是否有烟味" options={["有", "无"] as const} value={smell} onChange={setSmell} />
-        <ChoiceRow label="是否有人劝阻吸烟" options={["是", "否"] as const} value={staff} onChange={setStaff} />
+        <ChoiceRow label="是否看到无烟标志" options={["有", "无"] as const} value={sign} onChange={(v) => setSign(v)} />
+        <ChoiceRow label="是否有人吸烟" options={["有", "无"] as const} value={smoker} onChange={(v) => setSmoker(v)} />
+        <ChoiceRow label="是否有烟味" options={["有", "无"] as const} value={smell} onChange={(v) => setSmell(v)} />
+        <ChoiceRow label="是否有人劝阻吸烟" options={["是", "否"] as const} value={staff} onChange={(v) => setStaff(v)} />
 
         <div className="bg-card border border-border rounded-2xl p-4">
           <div className="text-sm font-medium mb-1">上传场所图片（可选）</div>
