@@ -721,7 +721,7 @@ function DetailPage({ place, fav, onFav, onBack, onReview, onNote }: {
 }
 
 function Choice<T extends string>({ label, options, value, onChange }: {
-  label: string; options: T[]; value: T | ""; onChange: (v: T) => void;
+  label: string; options: readonly T[]; value: T | ""; onChange: (v: T) => void;
 }) {
   return (
     <div className="bg-card border border-border rounded-2xl p-4">
