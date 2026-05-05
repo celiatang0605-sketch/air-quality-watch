@@ -5,7 +5,8 @@ import {
   Home, Trophy, PlusCircle, User, Coffee, Utensils, ShoppingBag, Hotel,
   Film, Mic2, Dumbbell, BookOpen, CupSoda, Building2, ArrowLeft, Camera,
   Wallet, Award, Eye, LifeBuoy, LogOut, Check, Cigarette, ShieldCheck,
-  Phone, Clock, Copy, Trash2, X,
+  Phone, Clock, Copy, Trash2, X, Settings, AlertTriangle, FileEdit,
+  HelpCircle, Sparkles, ChevronDown, Type as TypeIcon, MapPinned,
 } from "lucide-react";
 
 type Category =
