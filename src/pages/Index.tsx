@@ -1362,7 +1362,7 @@ function RankPage({ places, onPlace, favorites, onFav }: { places: Place[]; onPl
               i === 2 ? "bg-primary-soft text-primary" :
               "bg-secondary text-foreground"
             }`}>{i + 1}</div>
-            <img src={p.img} alt="" className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
+            <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm truncate">{p.name}</h3>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
