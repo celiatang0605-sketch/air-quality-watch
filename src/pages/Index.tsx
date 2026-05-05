@@ -378,10 +378,12 @@ export default function Index() {
       cover: data.images[0] || place.img,
       placeName: place.name,
       placeType: place.type,
+      placeArea: city,
       pointAward: 10,
+      likes: 0, isLiked: false, isCollected: false,
     };
     setPlaces(prev => prev.map(p => p.id === place.id ? { ...p, notes: [newNote, ...p.notes] } : p));
-    setMyNotes(prev => [newNote, ...prev]);
+    setAllNotes(prev => [newNote, ...prev]);
     setPoints(v => v + 10);
     setPointLogs(l => [{ id: rid(), type: "发布笔记", value: 10, time: nowLabel() }, ...l]);
     toast.success("笔记发布成功，获得 10 积分 ✨");
