@@ -1389,7 +1389,7 @@ function CategoryPage({ cat, setCat, sort, setSort, places, onPlace, favorites, 
       <div className="px-2 pt-2 overflow-x-auto">
         <div className="flex gap-2 px-2 min-w-max">
           {cats.map(c => (
-            <button key={c} onClick={() => setCat(c)}
+            <button key={c} onClick={() => setCat(c as Exclude<Category, "全部">)}
               className={`px-3 h-8 rounded-full text-xs font-medium border transition ${
                 cat === c ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border"
               }`}>{c}</button>
