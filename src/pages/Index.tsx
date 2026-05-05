@@ -7,7 +7,7 @@ import {
   Award, Eye, LogOut, Check, Cigarette, ShieldCheck,
   Phone, Clock, Copy, Trash2, X, Settings, AlertTriangle, FileEdit,
   HelpCircle, ChevronDown, Type as TypeIcon, MapPinned,
-  FileText, Edit3, ArrowUpRight, Wallet,
+  FileText, Edit3, ArrowUpRight, Wallet, ThumbsUp,
 } from "lucide-react";
 
 declare global {
