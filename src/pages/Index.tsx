@@ -7,7 +7,7 @@ import {
   Award, Eye, LogOut, Check, Cigarette, ShieldCheck,
   Phone, Clock, Copy, Trash2, X, Settings, AlertTriangle, FileEdit,
   HelpCircle, ChevronDown, Type as TypeIcon, MapPinned,
-  FileText, Edit3, ArrowUpRight, Wallet,
+  FileText, Edit3, ArrowUpRight, Wallet, ThumbsUp,
 } from "lucide-react";
 
 declare global {
@@ -42,8 +42,12 @@ type NoteItem = {
   tags: string[];
   cover: string; // image url
   placeName: string;
-  placeType: string;
+  placeType: Exclude<Category, "全部">;
+  placeArea?: string;
   pointAward?: number;
+  likes?: number;
+  isLiked?: boolean;
+  isCollected?: boolean;
 };
 
 type Place = {
@@ -81,12 +85,41 @@ const TYPE_IMG: Record<Exclude<Category, "全部">, string> = {
   "商场": "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=400&q=70&auto=format&fit=crop",
   "酒店": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=70&auto=format&fit=crop",
   "电影院": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=70&auto=format&fit=crop",
-  "KTV": "https://images.unsplash.com/photo-1571266028243-d220bc8e8df7?w=400&q=70&auto=format&fit=crop",
+  "KTV": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&q=70&auto=format&fit=crop",
   "健身房": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&q=70&auto=format&fit=crop",
   "书店": "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&q=70&auto=format&fit=crop",
-  "奶茶店": "https://images.unsplash.com/photo-1558857563-c0c6ee6ff8a3?w=400&q=70&auto=format&fit=crop",
+  "奶茶店": "https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=400&q=70&auto=format&fit=crop",
   "写字楼": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70&auto=format&fit=crop",
 };
+
+const TYPE_IMG_FALLBACK: Record<Exclude<Category, "全部">, string> = {
+  "咖啡馆": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=70&auto=format&fit=crop",
+  "餐厅": "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=70&auto=format&fit=crop",
+  "商场": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=70&auto=format&fit=crop",
+  "酒店": "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400&q=70&auto=format&fit=crop",
+  "电影院": "https://images.unsplash.com/photo-1562440499-64c9a111f713?w=400&q=70&auto=format&fit=crop",
+  "KTV": "https://images.unsplash.com/photo-1525362081669-2b476bb628c3?w=400&q=70&auto=format&fit=crop",
+  "健身房": "https://images.unsplash.com/photo-1546171753-97d7676e4602?w=400&q=70&auto=format&fit=crop",
+  "书店": "https://images.unsplash.com/photo-1504675099198-7023dd85f5a3?w=400&q=70&auto=format&fit=crop",
+  "奶茶店": "https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&q=70&auto=format&fit=crop",
+  "写字楼": "https://images.unsplash.com/photo-1581375074612-d1fd0e661aeb?w=400&q=70&auto=format&fit=crop",
+};
+
+function PlaceImg({ src, type, alt, className }: { src: string; type: Exclude<Category, "全部">; alt?: string; className?: string }) {
+  return (
+    <img
+      src={src || TYPE_IMG[type]}
+      alt={alt || type}
+      loading="lazy"
+      className={className}
+      onError={(e) => {
+        const el = e.currentTarget;
+        const fb = TYPE_IMG_FALLBACK[type];
+        if (el.src !== fb) el.src = fb;
+      }}
+    />
+  );
+}
 
 /* ============== 评分规则 ============== */
 function scoreFromAnswers(a: { sign: string; smoker: string; smell: string; staff: string }) {
@@ -202,6 +235,24 @@ const PLACES_INIT: Place[] = [
   },
 ];
 
+const NOTE_IMG: Record<Exclude<Category, "全部">, string> = {
+  ...TYPE_IMG,
+};
+const SEED_NOTES: NoteItem[] = [
+  { id: "n1", user: "清新呼吸", avatar: "🍃", time: "10 分钟前", placeName: "% Arabica 咖啡（武康路）", placeType: "咖啡馆", placeArea: "徐汇 · 武康路", cover: TYPE_IMG["咖啡馆"], text: "店里有明显禁烟标志，整个空间都很清新，拍照也好看。", tags: ["禁烟标志", "无烟友好"], likes: 28, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n2", user: "奶茶星人", avatar: "🧋", time: "32 分钟前", placeName: "喜茶 LAB（张园店）", placeType: "奶茶店", placeArea: "静安 · 张园", cover: TYPE_IMG["奶茶店"], text: "排队区在户外，但室内完全没有烟味，店员会提醒不要吸烟。", tags: ["无烟友好", "店员劝阻"], likes: 41, isLiked: true, isCollected: false, pointAward: 10 },
+  { id: "n3", user: "唱歌不抽烟", avatar: "🎤", time: "1 小时前", placeName: "纯K（静安店）", placeType: "KTV", placeArea: "静安 · 愚园路", cover: TYPE_IMG["KTV"], text: "包厢里有残留烟味，开了通风后好一些，希望店家加强劝阻。", tags: ["有烟味反馈"], likes: 12, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n4", user: "周末逛街", avatar: "🛍️", time: "2 小时前", placeName: "兴业太古汇", placeType: "商场", placeArea: "静安 · 南京西路", cover: TYPE_IMG["商场"], text: "入口附近有人吸烟，但中庭通风做得很好，整体还可以接受。", tags: ["有烟味反馈", "图片笔记"], likes: 9, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n5", user: "电影迷", avatar: "🎬", time: "3 小时前", placeName: "万达影城（大宁店）", placeType: "电影院", placeArea: "静安 · 共和新路", cover: TYPE_IMG["电影院"], text: "大厅有禁烟提示，观影区完全无烟，体验很好。", tags: ["禁烟标志", "无烟友好"], likes: 17, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n6", user: "撸铁选手", avatar: "🏋️", time: "5 小时前", placeName: "威尔士健身（静安店）", placeType: "健身房", placeArea: "静安 · 南京西路", cover: TYPE_IMG["健身房"], text: "门口偶尔有人抽烟，进了室内空气很好，更衣室也清新。", tags: ["无烟友好"], likes: 22, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n7", user: "书页香", avatar: "📚", time: "昨天", placeName: "茑屋书店（上生·新所）", placeType: "书店", placeArea: "长宁 · 延安西路", cover: TYPE_IMG["书店"], text: "完全没有闻到烟味，环境安静，是看书的好地方。", tags: ["无烟友好", "禁烟标志"], likes: 35, isLiked: false, isCollected: true, pointAward: 10 },
+  { id: "n8", user: "小笼控", avatar: "🥟", time: "昨天", placeName: "鼎泰丰（南京西路店）", placeType: "餐厅", placeArea: "静安 · 南京西路", cover: TYPE_IMG["餐厅"], text: "包间也是全程禁烟，店员会主动劝阻顾客。", tags: ["店员劝阻", "无烟友好"], likes: 19, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n9", user: "差旅日常", avatar: "🧳", time: "2 天前", placeName: "上海静安瑞吉酒店", placeType: "酒店", placeArea: "静安 · 石门一路", cover: TYPE_IMG["酒店"], text: "无烟楼层执行很到位，大堂也清爽，住得很舒适。", tags: ["无烟友好"], likes: 26, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n10", user: "通勤打工人", avatar: "💼", time: "2 天前", placeName: "凯德 Mall 写字楼大厅", placeType: "写字楼", placeArea: "静安 · 愚园路", cover: TYPE_IMG["写字楼"], text: "电梯口偶尔有人吸烟，建议加装禁烟提示。", tags: ["有烟味反馈"], likes: 7, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n11", user: "拿铁拿铁", avatar: "☕", time: "3 天前", placeName: "% Arabica 咖啡（武康路）", placeType: "咖啡馆", placeArea: "徐汇 · 武康路", cover: TYPE_IMG["咖啡馆"], text: "工作人员看到有人想抽烟会立刻劝阻，体验非常棒。", tags: ["店员劝阻", "无烟友好"], likes: 31, isLiked: true, isCollected: false, pointAward: 10 },
+  { id: "n12", user: "夜归人", avatar: "🌙", time: "3 天前", placeName: "纯K（静安店）", placeType: "KTV", placeArea: "静安 · 愚园路", cover: TYPE_IMG["KTV"], text: "包厢禁烟标志在墙上比较显眼，但还是有客人偷偷抽。", tags: ["禁烟标志", "有烟味反馈"], likes: 14, isLiked: false, isCollected: false, pointAward: 10 },
+];
+
 type Page =
   | "login" | "phoneLogin" | "home" | "list" | "search" | "category" | "detail"
   | "publish" | "review" | "note" | "myNotes"
@@ -231,7 +282,8 @@ export default function Index() {
     { id: "p4", type: "提交评价", value: 5, time: "今天 10:12" },
   ]);
   const [places, setPlaces] = useState<Place[]>(PLACES_INIT);
-  const [myNotes, setMyNotes] = useState<NoteItem[]>([]);
+  const [allNotes, setAllNotes] = useState<NoteItem[]>(SEED_NOTES);
+  const myNotes = useMemo(() => allNotes.filter(n => n.user === "我"), [allNotes]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [city, setCity] = useState("上海市 静安区");
   const [fontSize, setFontSize] = useState<FontSize>("standard");
@@ -326,10 +378,12 @@ export default function Index() {
       cover: data.images[0] || place.img,
       placeName: place.name,
       placeType: place.type,
+      placeArea: city,
       pointAward: 10,
+      likes: 0, isLiked: false, isCollected: false,
     };
     setPlaces(prev => prev.map(p => p.id === place.id ? { ...p, notes: [newNote, ...p.notes] } : p));
-    setMyNotes(prev => [newNote, ...prev]);
+    setAllNotes(prev => [newNote, ...prev]);
     setPoints(v => v + 10);
     setPointLogs(l => [{ id: rid(), type: "发布笔记", value: 10, time: nowLabel() }, ...l]);
     toast.success("笔记发布成功，获得 10 积分 ✨");
@@ -482,7 +536,12 @@ export default function Index() {
             />
           )}
           {page === "myNotes" && (
-            <MyNotesPage notes={myNotes} onGoNote={() => setPage("note")} />
+            <NotesPlazaPage
+              notes={allNotes}
+              onGoNote={() => setPage("note")}
+              onToggleLike={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isLiked: !n.isLiked, likes: (n.likes || 0) + (n.isLiked ? -1 : 1) } : n))}
+              onToggleCollect={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isCollected: !n.isCollected } : n))}
+            />
           )}
           {page === "addPlace" && (
             <AddPlacePage
@@ -708,7 +767,7 @@ function PlaceCard({ p, fav, onFav, onClick }: { p: Place; fav: boolean; onFav: 
   return (
     <button onClick={onClick} className="w-full text-left bg-card rounded-2xl p-3 shadow-sm border border-border/60 active:scale-[0.99] transition">
       <div className="flex gap-3">
-        <img src={p.img} alt={p.name} loading="lazy"
+        <PlaceImg src={p.img} type={p.type} alt={p.name}
           className="w-24 h-24 rounded-2xl object-cover bg-secondary shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
@@ -894,22 +953,35 @@ function ReviewCard({ r }: { r: ReviewItem }) {
   );
 }
 
-function NoteCard({ n }: { n: NoteItem }) {
+function NoteCard({ n, onLike, onCollect }: { n: NoteItem; onLike?: () => void; onCollect?: () => void }) {
   return (
     <div className="bg-card border border-border rounded-2xl p-3 shadow-sm">
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-sm">{n.avatar}</div>
-        <div className="flex-1 text-sm font-medium">{n.user}</div>
-        <div className="text-[11px] text-muted-foreground">{n.time}</div>
+        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm">{n.avatar}</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium truncate">{n.user}</div>
+          <div className="text-[11px] text-muted-foreground">{n.time}</div>
+        </div>
+        {n.pointAward && <span className="text-[10px] text-accent bg-accent-soft px-1.5 py-0.5 rounded">+{n.pointAward} 积分</span>}
       </div>
-      <img src={n.cover} alt={n.placeName} className="w-full aspect-[16/10] rounded-xl object-cover mb-2 bg-secondary" />
+      <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-2">
+        <MapPin className="w-3 h-3 shrink-0" />
+        <span className="truncate">{n.placeName} · {n.placeType}{n.placeArea ? ` · ${n.placeArea}` : ""}</span>
+      </div>
+      <PlaceImg src={n.cover} type={n.placeType} alt={n.placeName} className="w-full aspect-[16/10] rounded-xl object-cover mb-2 bg-secondary" />
       <p className="text-sm leading-relaxed">{n.text}</p>
-      <div className="mt-1 flex flex-wrap gap-1">
-        {n.tags.map(t => <span key={t} className="text-[10px] text-primary bg-primary-soft px-1.5 py-0.5 rounded"># {t}</span>)}
+      <div className="mt-1.5 flex flex-wrap gap-1">
+        {n.tags.map(t => <span key={t} className="text-[10px] text-primary bg-primary-soft px-2 py-0.5 rounded-full">#{t}</span>)}
       </div>
-      <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{n.placeName} · {n.placeType}</span>
-        {n.pointAward && <span className="text-accent font-medium">+{n.pointAward} 积分</span>}
+      <div className="mt-2 flex items-center justify-end gap-3 text-[12px] text-muted-foreground">
+        <button onClick={(e) => { e.stopPropagation(); onLike?.(); }} className="flex items-center gap-1 active:scale-95 transition">
+          <ThumbsUp className={`w-4 h-4 ${n.isLiked ? "fill-primary text-primary" : ""}`} />
+          <span className={n.isLiked ? "text-primary" : ""}>{n.likes ?? 0}</span>
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onCollect?.(); }} className="flex items-center gap-1 active:scale-95 transition">
+          <Bookmark className={`w-4 h-4 ${n.isCollected ? "fill-accent text-accent" : ""}`} />
+          <span className={n.isCollected ? "text-accent" : ""}>收藏</span>
+        </button>
       </div>
     </div>
   );
@@ -926,7 +998,7 @@ function DetailPage({ place, fav, onFav, onBack, onReview, onNote, onReport, onC
   return (
     <div className="pb-32">
       <TopBar title="场所详情" onBack={onBack} />
-      <img src={place.img} alt={place.name} className="w-full h-44 object-cover bg-secondary" />
+      <PlaceImg src={place.img} type={place.type} alt={place.name} className="w-full h-44 object-cover bg-secondary" />
       <div className="p-4">
         <h1 className="text-lg font-bold">{place.name}</h1>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -1262,7 +1334,7 @@ function NotePage({ places, initialPlaceId, onBack, onSubmit }: {
               {places.map(p => (
                 <button key={p.id} onClick={() => { setPlaceId(p.id); setShowPicker(false); }}
                   className={`w-full p-3 rounded-xl flex items-center gap-3 text-left ${placeId === p.id ? "bg-primary-soft" : "active:bg-secondary"}`}>
-                  <img src={p.img} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                  <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-lg object-cover" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{p.name}</div>
                     <div className="text-[11px] text-muted-foreground">{p.type} · {p.address}</div>
@@ -1278,22 +1350,80 @@ function NotePage({ places, initialPlaceId, onBack, onSubmit }: {
   );
 }
 
-/* =================== My Notes =================== */
+/* =================== Notes Plaza =================== */
 
-function MyNotesPage({ notes, onGoNote }: { notes: NoteItem[]; onGoNote: () => void; }) {
+const NOTE_FILTERS = ["全部", "无烟友好", "有烟味反馈", "禁烟标志", "店员劝阻", "图片笔记"] as const;
+type NoteFilter = typeof NOTE_FILTERS[number];
+
+function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
+  notes: NoteItem[]; onGoNote: () => void;
+  onToggleLike: (id: string) => void; onToggleCollect: (id: string) => void;
+}) {
+  const [kw, setKw] = useState("");
+  const [filter, setFilter] = useState<NoteFilter>("全部");
+
+  const list = useMemo(() => {
+    let arr = notes;
+    if (filter === "图片笔记") arr = arr.filter(n => !!n.cover);
+    else if (filter !== "全部") arr = arr.filter(n => n.tags.includes(filter));
+    if (kw.trim()) {
+      const k = kw.trim().toLowerCase();
+      arr = arr.filter(n =>
+        n.placeName.toLowerCase().includes(k) ||
+        n.text.toLowerCase().includes(k) ||
+        n.tags.some(t => t.toLowerCase().includes(k)) ||
+        n.user.toLowerCase().includes(k)
+      );
+    }
+    return arr;
+  }, [notes, filter, kw]);
+
   return (
     <div>
-      <TopBar title="我的笔记" />
+      <div className="px-4 pt-5 pb-3 bg-gradient-to-b from-primary-soft to-background">
+        <h1 className="text-xl font-bold">笔记</h1>
+        <p className="text-xs text-muted-foreground mt-1">看看大家分享的场所空气体验</p>
+        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl border border-border px-3 h-11">
+          <Search className="w-4 h-4 text-muted-foreground" />
+          <input
+            value={kw}
+            onChange={(e) => setKw(e.target.value)}
+            placeholder="搜索场所、关键词、空气体验"
+            className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+          />
+          {kw && <button onClick={() => setKw("")}><X className="w-4 h-4 text-muted-foreground" /></button>}
+        </div>
+        <div className="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar">
+          {NOTE_FILTERS.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`shrink-0 px-3 h-8 rounded-full text-xs border transition ${
+                filter === f
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-foreground border-border"
+              }`}>{f}</button>
+          ))}
+        </div>
+      </div>
+
       <div className="p-4 space-y-3">
-        {notes.length === 0 ? (
+        {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <FileText className="w-12 h-12 text-muted-foreground opacity-40 mb-3" />
-            <p className="text-sm text-muted-foreground max-w-[260px]">你还没有发布笔记，去分享一次场所空气体验吧</p>
+            <p className="text-sm text-muted-foreground max-w-[280px]">
+              {notes.length === 0
+                ? "还没有人发布笔记，快来分享第一条场所空气体验吧"
+                : "没有匹配的笔记，换个关键词或筛选试试"}
+            </p>
             <button onClick={onGoNote} className="mt-5 h-11 px-6 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/30">
               去发笔记
             </button>
           </div>
-        ) : notes.map(n => <NoteCard key={n.id} n={n} />)}
+        ) : list.map(n => (
+          <NoteCard key={n.id} n={n}
+            onLike={() => onToggleLike(n.id)}
+            onCollect={() => onToggleCollect(n.id)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -1333,7 +1463,7 @@ function RankPage({ places, onPlace, favorites, onFav }: { places: Place[]; onPl
               i === 2 ? "bg-primary-soft text-primary" :
               "bg-secondary text-foreground"
             }`}>{i + 1}</div>
-            <img src={p.img} alt="" className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
+            <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm truncate">{p.name}</h3>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -1600,7 +1730,7 @@ function HistoryPage({ items, onPlace, onClear, onBack }: {
           <EmptyState icon={Eye} text="你还没有浏览记录" />
         ) : items.map(({ place, time }) => (
           <button key={place.id + time} onClick={() => onPlace(place)} className="w-full bg-card border border-border rounded-2xl p-3 flex items-center gap-3 text-left active:scale-[0.99] transition">
-            <img src={place.img} alt="" className="w-12 h-12 rounded-xl object-cover bg-secondary" />
+            <PlaceImg src={place.img} type={place.type} className="w-12 h-12 rounded-xl object-cover bg-secondary" />
             <div className="flex-1 min-w-0">
               <div className="font-medium text-sm truncate">{place.name}</div>
               <div className="text-[11px] text-muted-foreground mt-0.5">{place.type} · 浏览于 {time}</div>
