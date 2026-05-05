@@ -737,7 +737,7 @@ function PlaceCard({ p, fav, onFav, onClick }: { p: Place; fav: boolean; onFav: 
   return (
     <button onClick={onClick} className="w-full text-left bg-card rounded-2xl p-3 shadow-sm border border-border/60 active:scale-[0.99] transition">
       <div className="flex gap-3">
-        <img src={p.img} alt={p.name} loading="lazy"
+        <PlaceImg src={p.img} type={p.type} alt={p.name}
           className="w-24 h-24 rounded-2xl object-cover bg-secondary shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
