@@ -244,7 +244,7 @@ export default function Index() {
     setTab(t);
     if (t === "home") setPage("home");
     if (t === "rank") setPage("rank");
-    if (t === "publish") setPage("note");
+    if (t === "publish") setPage("addPlace");
     if (t === "me") setPage("me");
   };
 
