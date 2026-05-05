@@ -88,6 +88,35 @@ const TYPE_IMG: Record<Exclude<Category, "全部">, string> = {
   "写字楼": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=70&auto=format&fit=crop",
 };
 
+const TYPE_IMG_FALLBACK: Record<Exclude<Category, "全部">, string> = {
+  "咖啡馆": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=70&auto=format&fit=crop",
+  "餐厅": "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&q=70&auto=format&fit=crop",
+  "商场": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=70&auto=format&fit=crop",
+  "酒店": "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400&q=70&auto=format&fit=crop",
+  "电影院": "https://images.unsplash.com/photo-1562440499-64c9a111f713?w=400&q=70&auto=format&fit=crop",
+  "KTV": "https://images.unsplash.com/photo-1525362081669-2b476bb628c3?w=400&q=70&auto=format&fit=crop",
+  "健身房": "https://images.unsplash.com/photo-1546171753-97d7676e4602?w=400&q=70&auto=format&fit=crop",
+  "书店": "https://images.unsplash.com/photo-1504675099198-7023dd85f5a3?w=400&q=70&auto=format&fit=crop",
+  "奶茶店": "https://images.unsplash.com/photo-1556881286-fc6915169721?w=400&q=70&auto=format&fit=crop",
+  "写字楼": "https://images.unsplash.com/photo-1581375074612-d1fd0e661aeb?w=400&q=70&auto=format&fit=crop",
+};
+
+function PlaceImg({ src, type, alt, className }: { src: string; type: Exclude<Category, "全部">; alt?: string; className?: string }) {
+  return (
+    <img
+      src={src || TYPE_IMG[type]}
+      alt={alt || type}
+      loading="lazy"
+      className={className}
+      onError={(e) => {
+        const el = e.currentTarget;
+        const fb = TYPE_IMG_FALLBACK[type];
+        if (el.src !== fb) el.src = fb;
+      }}
+    />
+  );
+}
+
 /* ============== 评分规则 ============== */
 function scoreFromAnswers(a: { sign: string; smoker: string; smell: string; staff: string }) {
   let s = 0;
