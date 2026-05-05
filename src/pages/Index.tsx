@@ -1447,7 +1447,7 @@ function AddPlacePage({ city, onBack, onSubmit }: {
           <Field label="场所类型" required>
             <div className="flex flex-wrap gap-1.5">
               {CATEGORIES.map(c => (
-                <button key={c.key} onClick={() => setType(c.key)}
+                <button key={c.key} onClick={() => setType(c.key as Exclude<Category, "全部">)}
                   className={`px-2.5 h-8 rounded-full text-xs border ${type === c.key ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border"}`}>{c.key}</button>
               ))}
             </div>
