@@ -235,6 +235,24 @@ const PLACES_INIT: Place[] = [
   },
 ];
 
+const NOTE_IMG: Record<Exclude<Category, "全部">, string> = {
+  ...TYPE_IMG,
+};
+const SEED_NOTES: NoteItem[] = [
+  { id: "n1", user: "清新呼吸", avatar: "🍃", time: "10 分钟前", placeName: "% Arabica 咖啡（武康路）", placeType: "咖啡馆", placeArea: "徐汇 · 武康路", cover: TYPE_IMG["咖啡馆"], text: "店里有明显禁烟标志，整个空间都很清新，拍照也好看。", tags: ["禁烟标志", "无烟友好"], likes: 28, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n2", user: "奶茶星人", avatar: "🧋", time: "32 分钟前", placeName: "喜茶 LAB（张园店）", placeType: "奶茶店", placeArea: "静安 · 张园", cover: TYPE_IMG["奶茶店"], text: "排队区在户外，但室内完全没有烟味，店员会提醒不要吸烟。", tags: ["无烟友好", "店员劝阻"], likes: 41, isLiked: true, isCollected: false, pointAward: 10 },
+  { id: "n3", user: "唱歌不抽烟", avatar: "🎤", time: "1 小时前", placeName: "纯K（静安店）", placeType: "KTV", placeArea: "静安 · 愚园路", cover: TYPE_IMG["KTV"], text: "包厢里有残留烟味，开了通风后好一些，希望店家加强劝阻。", tags: ["有烟味反馈"], likes: 12, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n4", user: "周末逛街", avatar: "🛍️", time: "2 小时前", placeName: "兴业太古汇", placeType: "商场", placeArea: "静安 · 南京西路", cover: TYPE_IMG["商场"], text: "入口附近有人吸烟，但中庭通风做得很好，整体还可以接受。", tags: ["有烟味反馈", "图片笔记"], likes: 9, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n5", user: "电影迷", avatar: "🎬", time: "3 小时前", placeName: "万达影城（大宁店）", placeType: "电影院", placeArea: "静安 · 共和新路", cover: TYPE_IMG["电影院"], text: "大厅有禁烟提示，观影区完全无烟，体验很好。", tags: ["禁烟标志", "无烟友好"], likes: 17, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n6", user: "撸铁选手", avatar: "🏋️", time: "5 小时前", placeName: "威尔士健身（静安店）", placeType: "健身房", placeArea: "静安 · 南京西路", cover: TYPE_IMG["健身房"], text: "门口偶尔有人抽烟，进了室内空气很好，更衣室也清新。", tags: ["无烟友好"], likes: 22, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n7", user: "书页香", avatar: "📚", time: "昨天", placeName: "茑屋书店（上生·新所）", placeType: "书店", placeArea: "长宁 · 延安西路", cover: TYPE_IMG["书店"], text: "完全没有闻到烟味，环境安静，是看书的好地方。", tags: ["无烟友好", "禁烟标志"], likes: 35, isLiked: false, isCollected: true, pointAward: 10 },
+  { id: "n8", user: "小笼控", avatar: "🥟", time: "昨天", placeName: "鼎泰丰（南京西路店）", placeType: "餐厅", placeArea: "静安 · 南京西路", cover: TYPE_IMG["餐厅"], text: "包间也是全程禁烟，店员会主动劝阻顾客。", tags: ["店员劝阻", "无烟友好"], likes: 19, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n9", user: "差旅日常", avatar: "🧳", time: "2 天前", placeName: "上海静安瑞吉酒店", placeType: "酒店", placeArea: "静安 · 石门一路", cover: TYPE_IMG["酒店"], text: "无烟楼层执行很到位，大堂也清爽，住得很舒适。", tags: ["无烟友好"], likes: 26, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n10", user: "通勤打工人", avatar: "💼", time: "2 天前", placeName: "凯德 Mall 写字楼大厅", placeType: "写字楼", placeArea: "静安 · 愚园路", cover: TYPE_IMG["写字楼"], text: "电梯口偶尔有人吸烟，建议加装禁烟提示。", tags: ["有烟味反馈"], likes: 7, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n11", user: "拿铁拿铁", avatar: "☕", time: "3 天前", placeName: "% Arabica 咖啡（武康路）", placeType: "咖啡馆", placeArea: "徐汇 · 武康路", cover: TYPE_IMG["咖啡馆"], text: "工作人员看到有人想抽烟会立刻劝阻，体验非常棒。", tags: ["店员劝阻", "无烟友好"], likes: 31, isLiked: true, isCollected: false, pointAward: 10 },
+  { id: "n12", user: "夜归人", avatar: "🌙", time: "3 天前", placeName: "纯K（静安店）", placeType: "KTV", placeArea: "静安 · 愚园路", cover: TYPE_IMG["KTV"], text: "包厢禁烟标志在墙上比较显眼，但还是有客人偷偷抽。", tags: ["禁烟标志", "有烟味反馈"], likes: 14, isLiked: false, isCollected: false, pointAward: 10 },
+];
+
 type Page =
   | "login" | "phoneLogin" | "home" | "list" | "search" | "category" | "detail"
   | "publish" | "review" | "note" | "myNotes"
