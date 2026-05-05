@@ -1050,9 +1050,10 @@ function MeRow({ icon: Icon, label, value, onClick, accent }: { icon: any; label
   );
 }
 
-function MePage({ points, favCount, historyCount, onWallet, onPoints, onFavorites, onHistory, onLogout }: {
-  points: number; favCount: number; historyCount: number;
-  onWallet: () => void; onPoints: () => void; onFavorites: () => void; onHistory: () => void; onLogout: () => void;
+function MePage({ points, favCount, historyCount, city, onWallet, onPoints, onFavorites, onHistory, onAddPlace, onHelp, onSettings, onLogout }: {
+  points: number; favCount: number; historyCount: number; city?: string;
+  onWallet: () => void; onPoints: () => void; onFavorites: () => void; onHistory: () => void;
+  onAddPlace?: () => void; onHelp?: () => void; onSettings?: () => void; onLogout: () => void;
 }) {
   return (
     <div>
@@ -1062,7 +1063,7 @@ function MePage({ points, favCount, historyCount, onWallet, onPoints, onFavorite
           <div>
             <div className="font-bold text-lg">空气守护者</div>
             <div className="text-xs opacity-90 flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3" /> 上海市 · 静安区
+              <MapPin className="w-3 h-3" /> {city || "上海市 · 静安区"}
             </div>
           </div>
         </div>
@@ -1088,14 +1089,15 @@ function MePage({ points, favCount, historyCount, onWallet, onPoints, onFavorite
         <MeRow icon={Wallet} label="我的钱包" value={`${points} 余额`} onClick={onWallet} accent />
         <MeRow icon={Heart} label="我的收藏" value={`${favCount} 个`} onClick={onFavorites} />
         <MeRow icon={Eye} label="最近浏览" value={`${historyCount} 个`} onClick={onHistory} />
-        <MeRow icon={LifeBuoy} label="帮助中心" onClick={() => toast("Demo：帮助中心")} />
+        <MeRow icon={PlusCircle} label="添加新场所" onClick={onAddPlace} />
+        <MeRow icon={HelpCircle} label="帮助中心" onClick={onHelp} />
+        <MeRow icon={Settings} label="设置" onClick={onSettings} />
         <MeRow icon={LogOut} label="退出登录" onClick={onLogout} />
       </div>
       <div className="text-center text-[11px] text-muted-foreground mt-4 pb-4">空气点评 · v1.0 Demo</div>
     </div>
   );
 }
-
 function PointsPage({ points, logs, onBack, onWallet }: { points: number; logs: PointLog[]; onBack: () => void; onWallet: () => void; }) {
   return (
     <div>
