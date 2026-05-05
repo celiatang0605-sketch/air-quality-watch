@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { connectPhantom, exchangePoints, getPhantom, POINTS_PER_EXCHANGE } from "@/lib/solana/exchange";
 import {
   MapPin, Search, Wind, Heart, Bookmark, Bell, ChevronRight,
   Home, Trophy, PlusCircle, User, Coffee, Utensils, ShoppingBag, Hotel,
@@ -408,30 +409,55 @@ export default function Index() {
     setPage("home"); setTab("home");
   };
 
-  const connectWallet = async () => {
-    if (typeof window === "undefined" || !window.ethereum) {
-      toast.error("请先安装 MetaMask 钱包后再连接");
-      return;
-    }
+  const connectWallet = async (silent = false): Promise<string> => {
     try {
-      const accounts: string[] = await window.ethereum.request({ method: "eth_requestAccounts" });
-      if (accounts && accounts[0]) {
-        setWalletAddress(accounts[0]);
-        toast.success("钱包连接成功");
-      }
+      const addr = await connectPhantom();
+      setWalletAddress(addr);
+      if (!silent) toast.success("Phantom 钱包连接成功");
+      return addr;
     } catch (e) {
-      toast.error("钱包连接已取消");
+      const msg = e instanceof Error ? e.message : "钱包连接失败";
+      if (!silent) toast.error(msg);
+      return "";
     }
   };
 
-  const submitWithdraw = (amount: number) => {
-    if (!walletAddress) { toast.error("请先连接 MetaMask 钱包"); return; }
+  const submitWithdraw = async (amount: number) => {
+    let addr = walletAddress;
+    if (!addr) {
+      addr = await connectWallet();
+      if (!addr) return;
+    }
     if (!amount) { toast.error("请输入提现积分数量"); return; }
     if (amount > points) { toast.error("提现积分不能超过当前可用积分"); return; }
-    setPoints(v => v - amount);
-    setPointLogs(l => [{ id: rid(), type: "提现申请", value: -amount, time: nowLabel() }, ...l]);
-    setWithdraws(w => [{ id: rid(), amount, address: walletAddress, time: nowLabel(), status: "待处理" }, ...w]);
-    toast.success("提现申请已提交，请等待处理");
+    if (amount < POINTS_PER_EXCHANGE) {
+      toast.error(`最少 ${POINTS_PER_EXCHANGE} 积分起兑（${POINTS_PER_EXCHANGE} 积分 = 0.001 AVAX）`);
+      return;
+    }
+
+    const phantom = getPhantom();
+    if (!phantom) { toast.error("未检测到 Phantom 钱包"); return; }
+
+    const exchanges = Math.floor(amount / POINTS_PER_EXCHANGE);
+    const usePoints = exchanges * POINTS_PER_EXCHANGE;
+
+    const t = toast.loading("正在调用智能合约，请在钱包中确认...");
+    try {
+      let lastSig = "";
+      for (let i = 0; i < exchanges; i++) {
+        lastSig = await exchangePoints(phantom);
+      }
+      setPoints(v => v - usePoints);
+      setPointLogs(l => [{ id: rid(), type: `链上兑换 AVAX`, value: -usePoints, time: nowLabel() }, ...l]);
+      setWithdraws(w => [{
+        id: rid(), amount: usePoints, address: addr, time: nowLabel(),
+        status: `已上链 (${(exchanges * 0.001).toFixed(3)} AVAX)`,
+      }, ...w]);
+      toast.success(`兑换成功！签名 ${lastSig.slice(0, 8)}...`, { id: t });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "兑换失败";
+      toast.error(`链上交易失败：${msg}`, { id: t });
+    }
   };
 
   const showBottomTab = ["home", "rank", "publish", "myNotes", "me"].includes(page);
