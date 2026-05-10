@@ -1460,8 +1460,48 @@ function NotePage({ places, initialPlaceId, onBack, onSubmit }: {
 const NOTE_FILTERS = ["全部", "无烟友好", "有烟味反馈", "禁烟标志", "店员劝阻", "图片笔记"] as const;
 type NoteFilter = typeof NOTE_FILTERS[number];
 
-function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
+function NoteGridCard({ n, onLike, onCollect, onClick }: { n: NoteItem; onLike?: () => void; onCollect?: () => void; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] transition flex flex-col">
+      <div className="relative">
+        <PlaceImg src={n.cover} type={n.placeType} alt={n.placeName} className="w-full h-[120px] object-cover bg-secondary" />
+        {n.pointAward && (
+          <span className="absolute top-1.5 right-1.5 text-[10px] text-accent bg-card/95 px-1.5 py-0.5 rounded-full shadow-sm">+{n.pointAward}</span>
+        )}
+      </div>
+      <div className="p-2 flex-1 flex flex-col gap-1">
+        <p className="text-[12px] leading-snug line-clamp-2 text-foreground">{n.text}</p>
+        <div className="text-[10px] text-muted-foreground flex items-center gap-0.5 line-clamp-1">
+          <MapPin className="w-3 h-3 shrink-0" /><span className="truncate">{n.placeName}</span>
+        </div>
+        {n.tags.length > 0 && (
+          <div className="flex gap-1 flex-wrap">
+            {n.tags.slice(0, 2).map(t => <span key={t} className="text-[9px] text-primary bg-primary-soft px-1.5 py-0.5 rounded-full truncate max-w-full">#{t}</span>)}
+          </div>
+        )}
+        <div className="flex items-center justify-between mt-auto pt-1">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-sm">{n.avatar}</span>
+            <span className="text-[10px] text-muted-foreground truncate">{n.user}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={(e) => { e.stopPropagation(); onLike?.(); }} className="flex items-center gap-0.5 active:scale-95">
+              <ThumbsUp className={`w-3.5 h-3.5 ${n.isLiked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+              <span className={`text-[10px] ${n.isLiked ? "text-primary" : "text-muted-foreground"}`}>{n.likes ?? 0}</span>
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onCollect?.(); }} className="active:scale-95">
+              <Bookmark className={`w-3.5 h-3.5 ${n.isCollected ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NotesPlazaPage({ notes, onGoNote, onOpen, onToggleLike, onToggleCollect }: {
   notes: NoteItem[]; onGoNote: () => void;
+  onOpen?: (n: NoteItem) => void;
   onToggleLike: (id: string) => void; onToggleCollect: (id: string) => void;
 }) {
   const [kw, setKw] = useState("");
@@ -1485,10 +1525,10 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
 
   return (
     <div>
-      <div className="px-4 pt-5 pb-3 bg-gradient-to-b from-primary-soft to-background">
+      <div className="px-4 pt-4 pb-3 bg-gradient-to-b from-primary-soft to-background">
         <h1 className="text-xl font-bold">笔记</h1>
-        <p className="text-xs text-muted-foreground mt-1">看看大家分享的场所空气体验</p>
-        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl border border-border px-3 h-11">
+        <p className="text-xs text-muted-foreground mt-0.5">看看大家分享的场所空气体验</p>
+        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl border border-border px-3 h-10">
           <Search className="w-4 h-4 text-muted-foreground" />
           <input
             value={kw}
@@ -1498,7 +1538,7 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
           />
           {kw && <button onClick={() => setKw("")}><X className="w-4 h-4 text-muted-foreground" /></button>}
         </div>
-        <div className="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
           {NOTE_FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`shrink-0 px-3 h-8 rounded-full text-xs border transition ${
@@ -1510,7 +1550,7 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-3">
         {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <FileText className="w-12 h-12 text-muted-foreground opacity-40 mb-3" />
@@ -1523,12 +1563,17 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
               去发笔记
             </button>
           </div>
-        ) : list.map(n => (
-          <NoteCard key={n.id} n={n}
-            onLike={() => onToggleLike(n.id)}
-            onCollect={() => onToggleCollect(n.id)}
-          />
-        ))}
+        ) : (
+          <div className="grid grid-cols-2 gap-2.5">
+            {list.map(n => (
+              <NoteGridCard key={n.id} n={n}
+                onClick={() => onOpen?.(n)}
+                onLike={() => onToggleLike(n.id)}
+                onCollect={() => onToggleCollect(n.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
