@@ -1878,7 +1878,7 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
         <div className="rounded-2xl p-5 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg shadow-primary/30">
           <div className="text-xs opacity-90">当前可提现积分</div>
           <div className="text-4xl font-bold mt-1">{points}</div>
-          <div className="text-xs opacity-90 mt-2">兑换比率：1000 积分 = 0.001 AVAX</div>
+          <div className="text-xs opacity-90 mt-2">兑换比率：50 积分 = 0.01 AVAX</div>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-3 text-[11px] text-muted-foreground">
