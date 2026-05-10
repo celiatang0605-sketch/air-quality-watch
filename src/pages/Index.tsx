@@ -322,7 +322,9 @@ export default function Index() {
   const [allNotes, setAllNotes] = useState<NoteItem[]>(SEED_NOTES);
   const myNotes = useMemo(() => allNotes.filter(n => n.user === "我"), [allNotes]);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [city, setCity] = useState("上海市 静安区");
+  const [city, setCity] = useState("上海市");
+  const [activeNote, setActiveNote] = useState<NoteItem | null>(null);
+  const [cityReturnPage, setCityReturnPage] = useState<Page>("home");
   const [fontSize, setFontSize] = useState<FontSize>("standard");
   const [notifyOn, setNotifyOn] = useState(true);
   const [searchSort, setSearchSort] = useState<SortKey>("default");
