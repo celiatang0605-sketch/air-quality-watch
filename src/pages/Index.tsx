@@ -1322,13 +1322,34 @@ function ReviewPage({ place, city, onBack, onSubmit }: {
         <ChoiceRow label="是否有人劝阻吸烟" options={["是", "否"] as const} value={staff} onChange={(v) => setStaff(v)} />
 
         <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="text-sm font-medium mb-1">上传场所图片（可选）</div>
+          <div className="text-sm font-medium mb-1">上传场所图片（可选，最多 3 张）</div>
           <p className="text-[11px] text-muted-foreground mb-3">可上传禁烟标志或场所环境图片</p>
-          <button onClick={() => { setHasImg(true); toast.success("图片已添加"); }}
-            className={`w-full aspect-[4/3] rounded-xl border border-dashed flex flex-col items-center justify-center text-muted-foreground transition ${hasImg ? "bg-primary-soft border-primary text-primary" : "bg-secondary border-border"}`}>
-            {hasImg ? <><Check className="w-7 h-7" /><span className="text-xs mt-1">已上传</span></>
-              : <><Camera className="w-7 h-7" /><span className="text-xs mt-1">添加图片</span></>}
-          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} />
+          {images.length === 0 ? (
+            <button onClick={() => fileInputRef.current?.click()}
+              className="w-full aspect-[4/3] rounded-xl border border-dashed border-primary/40 bg-primary-soft flex flex-col items-center justify-center text-primary transition active:scale-[0.99]">
+              <Camera className="w-7 h-7" />
+              <span className="text-xs mt-1">添加图片</span>
+            </button>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {images.map((src, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-secondary">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {images.length < 3 && (
+                <button onClick={() => fileInputRef.current?.click()}
+                  className="aspect-square rounded-xl border-2 border-dashed border-primary/40 bg-primary-soft flex flex-col items-center justify-center text-primary active:scale-95 transition">
+                  <Camera className="w-6 h-6" />
+                  <span className="text-[11px] mt-1">添加</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <textarea
