@@ -1995,7 +1995,7 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
           </div>
           {amount && parseInt(amount, 10) >= 50 && (
             <div className="text-[11px] text-muted-foreground mt-2">
-              预计获得 {(Math.floor(parseInt(amount, 10) / 50) * 0.01).toFixed(2)} AVAX
+              预计获得 {(Math.floor(parseInt(amount, 10) / 50) * 0.01).toFixed(3)} SOL
             </div>
           )}
         </div>
