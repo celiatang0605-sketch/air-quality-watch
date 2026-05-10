@@ -55,6 +55,7 @@ type Place = {
   id: number;
   name: string;
   type: Exclude<Category, "全部">;
+  city: string;
   address: string;
   distance: string;
   reviewCount: number;
