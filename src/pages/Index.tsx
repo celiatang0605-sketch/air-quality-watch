@@ -1499,6 +1499,60 @@ function NoteGridCard({ n, onLike, onCollect, onClick }: { n: NoteItem; onLike?:
   );
 }
 
+function NoteDetailPage({ note, onBack, onToggleLike, onToggleCollect }: {
+  note: NoteItem;
+  onBack: () => void;
+  onToggleLike: () => void;
+  onToggleCollect: () => void;
+}) {
+  return (
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex items-center justify-between px-3 py-2 bg-card border-b border-border shrink-0">
+        <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center active:bg-secondary">
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </button>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-lg">{note.avatar}</span>
+          <span className="text-sm text-foreground truncate">{note.user}</span>
+        </div>
+        <div className="w-9" />
+      </div>
+      <div className="flex-1 overflow-y-auto phone-scroll">
+        <PlaceImg src={note.cover} type={note.placeType} alt={note.placeName} className="w-full aspect-square object-cover bg-secondary" />
+        <div className="p-4 space-y-3">
+          <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">{note.text}</p>
+          {note.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {note.tags.map(t => (
+                <span key={t} className="text-xs text-primary bg-primary-soft px-2 py-1 rounded-full">#{t}</span>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+            <MapPin className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">{note.placeName}</span>
+            {note.placeArea && <span className="text-muted-foreground/70">· {note.placeArea}</span>}
+          </div>
+          <div className="text-xs text-muted-foreground">{note.time}</div>
+          {note.pointAward && (
+            <div className="text-xs text-accent">发布奖励 +{note.pointAward} 积分</div>
+          )}
+        </div>
+      </div>
+      <div className="shrink-0 border-t border-border bg-card px-4 py-2 flex items-center justify-around">
+        <button onClick={onToggleLike} className="flex items-center gap-1.5 active:scale-95">
+          <ThumbsUp className={`w-5 h-5 ${note.isLiked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+          <span className={`text-sm ${note.isLiked ? "text-primary" : "text-muted-foreground"}`}>{note.likes ?? 0}</span>
+        </button>
+        <button onClick={onToggleCollect} className="flex items-center gap-1.5 active:scale-95">
+          <Bookmark className={`w-5 h-5 ${note.isCollected ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+          <span className={`text-sm ${note.isCollected ? "text-accent" : "text-muted-foreground"}`}>{note.isCollected ? "已收藏" : "收藏"}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function NotesPlazaPage({ notes, onGoNote, onOpen, onToggleLike, onToggleCollect }: {
   notes: NoteItem[]; onGoNote: () => void;
   onOpen?: (n: NoteItem) => void;
