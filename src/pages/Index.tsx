@@ -1864,8 +1864,10 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
   const submit = () => {
     const n = parseInt(amount || "0", 10);
     if (!n) { toast.error("请输入提现积分数量"); return; }
-    if (n > points) { toast.error("提现积分不能超过当前可用积分"); return; }
-    onSubmit(n);
+    if (n < 50) { toast.error("最低 50 积分起兑"); return; }
+    if (n > points) { toast.error("积分余额不足"); return; }
+    const usable = Math.floor(n / 50) * 50;
+    onSubmit(usable);
     setAmount("");
   };
 
