@@ -292,9 +292,9 @@ const SEED_NOTES: NoteItem[] = [
 
 type Page =
   | "login" | "phoneLogin" | "home" | "list" | "search" | "category" | "detail"
-  | "publish" | "review" | "note" | "myNotes"
+  | "publish" | "review" | "note" | "myNotes" | "noteDetail"
   | "rank" | "me" | "favorites" | "history" | "points"
-  | "addPlace" | "report" | "correction" | "help" | "settings" | "withdraw";
+  | "addPlace" | "report" | "correction" | "help" | "settings" | "withdraw" | "citySelect";
 
 type Tab = "home" | "rank" | "publish" | "notes" | "me";
 type SortKey = "default" | "distance" | "score" | "reviews" | "smoke";
