@@ -475,7 +475,7 @@ export default function Index() {
 
     const exchanges = Math.floor(amount / 50);
     const usePoints = exchanges * 50;
-    const avaxAmount = exchanges * 0.01;
+    const solAmount = exchanges * 0.01;
 
     const t = toast.loading("正在调用智能合约，请在钱包中确认...");
     try {
@@ -484,12 +484,12 @@ export default function Index() {
         lastSig = await exchangePoints(phantom);
       }
       setPoints(v => v - usePoints);
-      setPointLogs(l => [{ id: rid(), type: `链上兑换 AVAX`, value: -usePoints, time: nowLabel() }, ...l]);
+      setPointLogs(l => [{ id: rid(), type: `链上兑换 SOL`, value: -usePoints, time: nowLabel() }, ...l]);
       setWithdraws(w => [{
         id: rid(), amount: usePoints, address: addr, time: nowLabel(),
-        status: `已上链 (${avaxAmount.toFixed(2)} AVAX)`,
+        status: `已上链 (${solAmount.toFixed(3)} SOL)`,
       }, ...w]);
-      toast.success(`兑换成功！签名 ${lastSig.slice(0, 8)}...`, { id: t });
+      toast.success(`兑换成功，预计获得 ${solAmount.toFixed(3)} SOL`, { id: t });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "兑换失败";
       toast.error(`链上交易失败：${msg}`, { id: t });
