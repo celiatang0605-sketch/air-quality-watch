@@ -389,7 +389,7 @@ export default function Index() {
       // create lightweight place entry
       const id = Math.max(...places.map(p => p.id)) + 1;
       const np: Place = {
-        id, name: data.name, type: data.type, address: city,
+        id, name: data.name, type: data.type, city, address: city,
         distance: `${(Math.random() * 2 + 0.2).toFixed(1)}km`,
         reviewCount: 1, smokeReports: 0,
         tags: ["待审核"], img: TYPE_IMG[data.type] || TYPE_IMG["咖啡馆"],
