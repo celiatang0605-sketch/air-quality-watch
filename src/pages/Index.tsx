@@ -1755,15 +1755,28 @@ function RankPage({ city, places, onPlace, favorites, onFav }: { city?: string; 
         )}
         {list.map(({ p, score }, i) => {
           const tag = pickTag(p.tags, tab === "clean" ? POSITIVE_TAGS : NEGATIVE_TAGS);
+          const rankStyle: React.CSSProperties = (() => {
+            if (tab === "clean") {
+              if (i === 0) return { background: "#2F9E5B", color: "#FFFFFF" };
+              if (i === 1) return { background: "#4CAF70", color: "#FFFFFF" };
+              if (i === 2) return { background: "#DFF5E8", color: "#3FA463" };
+              return { color: "#2F9E5B" };
+            }
+            if (i === 0) return { background: "#F08A24", color: "#FFFFFF" };
+            if (i === 1) return { background: "#F3A64B", color: "#FFFFFF" };
+            if (i === 2) return { background: "#F7C98A", color: "#9A520D" };
+            return { color: "#111111" };
+          })();
+          const isTop3 = i < 3;
           return (
             <button key={p.id} onClick={() => onPlace(p)}
               className="w-full bg-card border border-border rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition text-left">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
-                i === 0 ? "bg-accent text-accent-foreground" :
-                i === 1 ? "bg-primary text-primary-foreground" :
-                i === 2 ? "bg-primary-soft text-primary" :
-                "bg-secondary text-foreground"
-              }`}>{i + 1}</div>
+              <div
+                style={rankStyle}
+                className={`w-8 h-8 flex items-center justify-center font-bold shrink-0 ${
+                  isTop3 ? "rounded-lg text-sm" : "text-base bg-transparent justify-start pl-1"
+                }`}
+              >{i + 1}</div>
               <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm truncate">{p.name}</h3>
