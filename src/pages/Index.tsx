@@ -431,7 +431,7 @@ export default function Index() {
   const submitNewPlace = (data: { name: string; type: Exclude<Category, "全部">; address: string }) => {
     const id = Math.max(...places.map(p => p.id)) + 1;
     const np: Place = {
-      id, name: data.name, type: data.type, address: data.address,
+      id, name: data.name, type: data.type, city, address: data.address,
       distance: `${(Math.random() * 2 + 0.2).toFixed(1)}km`,
       reviewCount: 0, smokeReports: 0,
       tags: ["待审核"], img: TYPE_IMG[data.type] || TYPE_IMG["咖啡馆"],
