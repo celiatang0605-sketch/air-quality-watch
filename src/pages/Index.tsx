@@ -1581,7 +1581,7 @@ function NotesPlazaPage({ notes, onGoNote, onOpen, onToggleLike, onToggleCollect
 
 /* =================== Rank =================== */
 
-function RankPage({ places, onPlace, favorites, onFav }: { places: Place[]; onPlace: (p: Place) => void; favorites: number[]; onFav: (id: number) => void; }) {
+function RankPage({ city, places, onPlace, favorites, onFav }: { city?: string; places: Place[]; onPlace: (p: Place) => void; favorites: number[]; onFav: (id: number) => void; }) {
   const [tab, setTab] = useState<"clean" | "improve">("clean");
   const list = useMemo(() => {
     const arr = places.map(p => ({ p, score: placeAvgScore(p) }));
@@ -1593,7 +1593,7 @@ function RankPage({ places, onPlace, favorites, onFav }: { places: Place[]; onPl
   return (
     <div>
       <div className="bg-gradient-to-b from-primary to-primary-glow text-primary-foreground px-4 pt-5 pb-12">
-        <h1 className="text-xl font-bold flex items-center gap-2"><Trophy className="w-5 h-5" /> 无烟榜单</h1>
+        <h1 className="text-xl font-bold flex items-center gap-2"><Trophy className="w-5 h-5" /> {city || "上海市"}无烟榜单</h1>
         <p className="text-xs opacity-90 mt-1">来自空气守护者们的真实评价</p>
       </div>
       <div className="-mt-8 mx-4 bg-card rounded-2xl shadow-sm border border-border p-1 flex">
