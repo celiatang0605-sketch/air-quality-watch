@@ -475,7 +475,7 @@ export default function Index() {
 
     const exchanges = Math.floor(amount / 50);
     const usePoints = exchanges * 50;
-    const avaxAmount = exchanges * 0.01;
+    const solAmount = exchanges * 0.01;
 
     const t = toast.loading("正在调用智能合约，请在钱包中确认...");
     try {
@@ -484,12 +484,12 @@ export default function Index() {
         lastSig = await exchangePoints(phantom);
       }
       setPoints(v => v - usePoints);
-      setPointLogs(l => [{ id: rid(), type: `链上兑换 AVAX`, value: -usePoints, time: nowLabel() }, ...l]);
+      setPointLogs(l => [{ id: rid(), type: `链上兑换 SOL`, value: -usePoints, time: nowLabel() }, ...l]);
       setWithdraws(w => [{
         id: rid(), amount: usePoints, address: addr, time: nowLabel(),
-        status: `已上链 (${avaxAmount.toFixed(2)} AVAX)`,
+        status: `已上链 (${solAmount.toFixed(3)} SOL)`,
       }, ...w]);
-      toast.success(`兑换成功！签名 ${lastSig.slice(0, 8)}...`, { id: t });
+      toast.success(`兑换成功，预计获得 ${solAmount.toFixed(3)} SOL`, { id: t });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "兑换失败";
       toast.error(`链上交易失败：${msg}`, { id: t });
@@ -1940,12 +1940,12 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
 
   return (
     <div className="pb-10">
-      <TopBar title="提现兑换 AVAX" onBack={onBack} />
+      <TopBar title="提现兑换 SOL" onBack={onBack} />
       <div className="p-4 space-y-4">
         <div className="rounded-2xl p-5 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg shadow-primary/30">
           <div className="text-xs opacity-90">当前可提现积分</div>
           <div className="text-4xl font-bold mt-1">{points}</div>
-          <div className="text-xs opacity-90 mt-2">兑换比率：50 积分 = 0.01 AVAX</div>
+          <div className="text-xs opacity-90 mt-2">兑换比率：50 积分 = 0.01 SOL</div>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-3 text-[11px] text-muted-foreground">
@@ -1995,7 +1995,7 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
           </div>
           {amount && parseInt(amount, 10) >= 50 && (
             <div className="text-[11px] text-muted-foreground mt-2">
-              预计获得 {(Math.floor(parseInt(amount, 10) / 50) * 0.01).toFixed(2)} AVAX
+              预计获得 {(Math.floor(parseInt(amount, 10) / 50) * 0.01).toFixed(3)} SOL
             </div>
           )}
         </div>
