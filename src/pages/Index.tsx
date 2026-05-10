@@ -901,6 +901,7 @@ function PlaceCard({ p, fav, onFav, onClick }: { p: Place; fav: boolean; onFav: 
 function HomePage(props: {
   search: string; setSearch: (v: string) => void;
   city?: string;
+  onCityClick?: () => void;
   setFilterCat: (c: Category) => void;
   places: Place[]; onPlace: (p: Place) => void;
   favorites: number[]; onFav: (id: number) => void;
@@ -911,9 +912,9 @@ function HomePage(props: {
     <div>
       <div className="bg-gradient-to-b from-primary-soft to-background px-4 pt-4 pb-3">
         <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-1 text-foreground font-medium">
-            <MapPin className="w-4 h-4 text-primary" /> {props.city || "上海市 静安区"} <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </div>
+          <button onClick={props.onCityClick} className="flex items-center gap-1 text-foreground font-medium active:opacity-70">
+            <MapPin className="w-4 h-4 text-primary" /> {props.city || "上海市"} <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          </button>
           <Bell className="w-5 h-5 text-muted-foreground" />
         </div>
         <form
