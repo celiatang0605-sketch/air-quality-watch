@@ -467,17 +467,15 @@ export default function Index() {
       if (!addr) return;
     }
     if (!amount) { toast.error("请输入提现积分数量"); return; }
-    if (amount > points) { toast.error("提现积分不能超过当前可用积分"); return; }
-    if (amount < POINTS_PER_EXCHANGE) {
-      toast.error(`最少 ${POINTS_PER_EXCHANGE} 积分起兑（${POINTS_PER_EXCHANGE} 积分 = 0.001 AVAX）`);
-      return;
-    }
+    if (amount < 50) { toast.error("最低 50 积分起兑"); return; }
+    if (amount > points) { toast.error("积分余额不足"); return; }
 
     const phantom = getPhantom();
     if (!phantom) { toast.error("未检测到 Phantom 钱包"); return; }
 
-    const exchanges = Math.floor(amount / POINTS_PER_EXCHANGE);
-    const usePoints = exchanges * POINTS_PER_EXCHANGE;
+    const exchanges = Math.floor(amount / 50);
+    const usePoints = exchanges * 50;
+    const avaxAmount = exchanges * 0.01;
 
     const t = toast.loading("正在调用智能合约，请在钱包中确认...");
     try {
@@ -489,7 +487,7 @@ export default function Index() {
       setPointLogs(l => [{ id: rid(), type: `链上兑换 AVAX`, value: -usePoints, time: nowLabel() }, ...l]);
       setWithdraws(w => [{
         id: rid(), amount: usePoints, address: addr, time: nowLabel(),
-        status: `已上链 (${(exchanges * 0.001).toFixed(3)} AVAX)`,
+        status: `已上链 (${avaxAmount.toFixed(2)} AVAX)`,
       }, ...w]);
       toast.success(`兑换成功！签名 ${lastSig.slice(0, 8)}...`, { id: t });
     } catch (e) {
@@ -1866,8 +1864,10 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
   const submit = () => {
     const n = parseInt(amount || "0", 10);
     if (!n) { toast.error("请输入提现积分数量"); return; }
-    if (n > points) { toast.error("提现积分不能超过当前可用积分"); return; }
-    onSubmit(n);
+    if (n < 50) { toast.error("最低 50 积分起兑"); return; }
+    if (n > points) { toast.error("积分余额不足"); return; }
+    const usable = Math.floor(n / 50) * 50;
+    onSubmit(usable);
     setAmount("");
   };
 
@@ -1878,7 +1878,7 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
         <div className="rounded-2xl p-5 bg-gradient-to-br from-primary to-primary-glow text-primary-foreground shadow-lg shadow-primary/30">
           <div className="text-xs opacity-90">当前可提现积分</div>
           <div className="text-4xl font-bold mt-1">{points}</div>
-          <div className="text-xs opacity-90 mt-2">兑换比率：1000 积分 = 0.001 AVAX</div>
+          <div className="text-xs opacity-90 mt-2">兑换比率：50 积分 = 0.01 AVAX</div>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-3 text-[11px] text-muted-foreground">
@@ -1917,18 +1917,18 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
 
         {/* 提现金额 */}
         <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="text-sm font-medium mb-2">提现积分（最少 1000 起兑）</div>
+          <div className="text-sm font-medium mb-2">提现积分（最少 50 起兑）</div>
           <div className="flex items-center gap-2">
             <input value={amount} onChange={e => setAmount(e.target.value.replace(/\D/g, ""))}
               placeholder="请输入提现积分数量"
               className="flex-1 h-11 bg-secondary rounded-xl px-3 text-sm outline-none" />
-            <button onClick={() => setAmount(String(Math.floor(points / 1000) * 1000))} className="h-11 px-3 rounded-xl bg-primary-soft text-primary text-xs font-medium shrink-0">
+            <button onClick={() => setAmount(String(Math.floor(points / 50) * 50))} className="h-11 px-3 rounded-xl bg-primary-soft text-primary text-xs font-medium shrink-0">
               全部兑换
             </button>
           </div>
-          {amount && parseInt(amount, 10) >= 1000 && (
+          {amount && parseInt(amount, 10) >= 50 && (
             <div className="text-[11px] text-muted-foreground mt-2">
-              预计获得 {(Math.floor(parseInt(amount, 10) / 1000) * 0.001).toFixed(3)} AVAX
+              预计获得 {(Math.floor(parseInt(amount, 10) / 50) * 0.01).toFixed(2)} AVAX
             </div>
           )}
         </div>
