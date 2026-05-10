@@ -55,6 +55,7 @@ type Place = {
   id: number;
   name: string;
   type: Exclude<Category, "全部">;
+  city: string;
   address: string;
   distance: string;
   reviewCount: number;
@@ -153,7 +154,7 @@ const seedReview = (p: Partial<ReviewItem>): ReviewItem => {
 const PLACES_INIT: Place[] = [
   {
     id: 1, name: "M Stand 咖啡（兴业太古汇店）", type: "咖啡馆",
-    address: "南京西路 789 号", distance: "320m",
+    city: "上海市", address: "南京西路 789 号", distance: "320m",
     reviewCount: 286, smokeReports: 2,
     tags: ["全店无烟", "空气清爽", "有提示牌"], img: TYPE_IMG["咖啡馆"],
     businessHours: "08:00 - 22:00", phone: "021-6288 1234",
@@ -164,7 +165,7 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 2, name: "鼎泰丰（恒隆店）", type: "餐厅",
-    address: "恒隆广场 6F", distance: "510m",
+    city: "上海市", address: "恒隆广场 6F", distance: "510m",
     reviewCount: 1024, smokeReports: 5,
     tags: ["室内无烟", "工作人员劝阻"], img: TYPE_IMG["餐厅"],
     businessHours: "10:30 - 22:00", phone: "021-6279 9999",
@@ -172,15 +173,15 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 3, name: "兴业太古汇", type: "商场",
-    address: "南京西路 789 号", distance: "300m",
+    city: "上海市", address: "南京西路 789 号", distance: "300m",
     reviewCount: 532, smokeReports: 8,
     tags: ["公共区无烟", "通风良好"], img: TYPE_IMG["商场"],
     businessHours: "10:00 - 22:00", phone: "021-2230 8888",
     reviews: [seedReview({ user: "周末逛街", avatar: "🛍️", text: "中庭通风很好，没有闻到烟味。" })], notes: [],
   },
   {
-    id: 4, name: "上海静安瑞吉酒店", type: "酒店",
-    address: "石门一路 288 号", distance: "1.2km",
+    id: 4, name: "上海瑞吉酒店", type: "酒店",
+    city: "上海市", address: "石门一路 288 号", distance: "1.2km",
     reviewCount: 412, smokeReports: 3,
     tags: ["无烟楼层", "大堂无烟"], img: TYPE_IMG["酒店"],
     businessHours: "全天 24 小时", phone: "021-2287 3000",
@@ -188,23 +189,23 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 5, name: "万达影城（大宁店）", type: "电影院",
-    address: "共和新路 1898 号", distance: "2.4km",
+    city: "上海市", address: "共和新路 1898 号", distance: "2.4km",
     reviewCount: 766, smokeReports: 12,
     tags: ["影厅无烟", "走廊偶有烟味"], img: TYPE_IMG["电影院"],
     businessHours: "10:00 - 次日 01:00", phone: "021-5696 5555",
     reviews: [seedReview({ user: "电影迷", avatar: "🎬", smell: "有", staff: "没看到", text: "影厅没烟，但走廊偶尔能闻到。" })], notes: [],
   },
   {
-    id: 6, name: "纯K（静安店）", type: "KTV",
-    address: "愚园路 68 号", distance: "1.8km",
+    id: 6, name: "纯K", type: "KTV",
+    city: "上海市", address: "愚园路 68 号", distance: "1.8km",
     reviewCount: 198, smokeReports: 47,
     tags: ["包厢有烟味", "缺少劝阻"], img: TYPE_IMG["KTV"],
     businessHours: "12:00 - 次日 02:00", phone: "021-6248 1111",
     reviews: [seedReview({ user: "唱歌不抽烟", avatar: "🎤", sign: "无", smoker: "有", smell: "有", staff: "无", text: "包厢里烟味较重。" })], notes: [],
   },
   {
-    id: 7, name: "威尔士健身（静安店）", type: "健身房",
-    address: "南京西路 1266 号", distance: "640m",
+    id: 7, name: "威尔士健身", type: "健身房",
+    city: "上海市", address: "南京西路 1266 号", distance: "640m",
     reviewCount: 321, smokeReports: 1,
     tags: ["全场无烟", "更衣室清新"], img: TYPE_IMG["健身房"],
     businessHours: "06:00 - 23:00", phone: "021-6133 0000",
@@ -212,7 +213,7 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 8, name: "茑屋书店（上生·新所）", type: "书店",
-    address: "延安西路 1262 号", distance: "3.1km",
+    city: "上海市", address: "延安西路 1262 号", distance: "3.1km",
     reviewCount: 654, smokeReports: 0,
     tags: ["阅读区无烟", "空气安静"], img: TYPE_IMG["书店"],
     businessHours: "10:00 - 22:00", phone: "021-6248 8888",
@@ -220,45 +221,80 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 9, name: "喜茶 LAB（张园店）", type: "奶茶店",
-    address: "茂名北路 张园西区", distance: "880m",
+    city: "上海市", address: "茂名北路 张园西区", distance: "880m",
     reviewCount: 410, smokeReports: 4,
     tags: ["室内无烟", "有提示牌"], img: TYPE_IMG["奶茶店"],
     businessHours: "10:00 - 22:30", phone: "400-021-1234",
     reviews: [seedReview({ user: "奶茶星人", avatar: "🧋", text: "室内非常干净，没有烟味。" })], notes: [],
   },
   {
-    id: 10, name: "凯德 Mall（静安寺店）写字楼大厅", type: "写字楼",
-    address: "愚园路 168 号", distance: "1.0km",
+    id: 10, name: "凯德 Mall 写字楼大厅", type: "写字楼",
+    city: "上海市", address: "愚园路 168 号", distance: "1.0km",
     reviewCount: 156, smokeReports: 6,
     tags: ["大堂无烟", "电梯口偶有"], img: TYPE_IMG["写字楼"],
     businessHours: "07:00 - 22:00", phone: "021-3220 0000",
     reviews: [seedReview({ user: "通勤打工人", avatar: "💼", smell: "有", staff: "没看到", text: "大堂无烟，电梯口偶尔有人抽。" })], notes: [],
   },
+
+  // 北京市
+  { id: 101, name: "Seesaw 咖啡（三里屯店）", type: "咖啡馆", city: "北京市", address: "三里屯太古里南区", distance: "450m", reviewCount: 312, smokeReports: 3, tags: ["全店无烟", "环境清爽"], img: TYPE_IMG["咖啡馆"], businessHours: "08:00 - 22:00", phone: "010-6417 1234", reviews: [seedReview({ user: "京味咖啡", avatar: "☕", text: "店里禁烟标志很明显，空气很好。" })], notes: [] },
+  { id: 102, name: "全聚德（前门店）", type: "餐厅", city: "北京市", address: "前门大街 30 号", distance: "1.5km", reviewCount: 1280, smokeReports: 6, tags: ["大厅无烟", "包间无烟"], img: TYPE_IMG["餐厅"], businessHours: "11:00 - 22:00", phone: "010-6701 1888", reviews: [seedReview({ user: "胡同游", avatar: "🦆", text: "大厅完全没有烟味。" })], notes: [] },
+  { id: 103, name: "三里屯太古里", type: "商场", city: "北京市", address: "工体北路 19 号", distance: "300m", reviewCount: 980, smokeReports: 9, tags: ["公共区无烟", "通风良好"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "010-6417 6688", reviews: [seedReview({ user: "潮人逛街", avatar: "🛍️", text: "通风做得很好。" })], notes: [] },
+
+  // 深圳市
+  { id: 201, name: "% Arabica（万象天地店）", type: "咖啡馆", city: "深圳市", address: "深南大道 9668 号", distance: "520m", reviewCount: 410, smokeReports: 1, tags: ["全店无烟"], img: TYPE_IMG["咖啡馆"], businessHours: "08:00 - 22:00", phone: "0755-8888 1234", reviews: [seedReview({ user: "鹏城拿铁", avatar: "☕", text: "整个店无烟，体验非常好。" })], notes: [] },
+  { id: 202, name: "海底捞（万象城店）", type: "餐厅", city: "深圳市", address: "宝安南路 1881 号", distance: "1.1km", reviewCount: 2103, smokeReports: 4, tags: ["室内无烟", "工作人员劝阻"], img: TYPE_IMG["餐厅"], businessHours: "10:00 - 次日 02:00", phone: "0755-2580 0000", reviews: [seedReview({ user: "麻辣星人", avatar: "🍲", text: "室内全程无烟，舒服。" })], notes: [] },
+  { id: 203, name: "喜茶（深业上城店）", type: "奶茶店", city: "深圳市", address: "皇岗路 5001 号", distance: "780m", reviewCount: 612, smokeReports: 2, tags: ["室内无烟", "有提示牌"], img: TYPE_IMG["奶茶店"], businessHours: "10:00 - 22:30", phone: "400-021-1234", reviews: [seedReview({ user: "奶茶女孩", avatar: "🧋", text: "店里干净没有烟味。" })], notes: [] },
+
+  // 广州市
+  { id: 301, name: "陶陶居（北京路店）", type: "餐厅", city: "广州市", address: "北京路 388 号", distance: "600m", reviewCount: 1530, smokeReports: 5, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "07:00 - 22:00", phone: "020-8338 8888", reviews: [seedReview({ user: "早茶达人", avatar: "🥟", text: "早茶环境无烟很舒服。" })], notes: [] },
+  { id: 302, name: "天环广场", type: "商场", city: "广州市", address: "天河路 218 号", distance: "1.0km", reviewCount: 880, smokeReports: 7, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "020-3878 8888", reviews: [seedReview({ user: "羊城逛街", avatar: "🛍️", text: "通风很好。" })], notes: [] },
+  { id: 303, name: "广州瑰丽酒店", type: "酒店", city: "广州市", address: "珠江东路 222 号", distance: "2.0km", reviewCount: 360, smokeReports: 1, tags: ["无烟楼层", "大堂无烟"], img: TYPE_IMG["酒店"], businessHours: "全天 24 小时", phone: "020-8883 6688", reviews: [seedReview({ user: "差旅熟客", avatar: "🧳", text: "无烟楼层很安静。" })], notes: [] },
+
+  // 杭州市
+  { id: 401, name: "西湖国宾馆", type: "酒店", city: "杭州市", address: "杨公堤 18 号", distance: "1.8km", reviewCount: 290, smokeReports: 0, tags: ["无烟环境", "庭院清新"], img: TYPE_IMG["酒店"], businessHours: "全天 24 小时", phone: "0571-8797 9889", reviews: [seedReview({ user: "湖畔住客", avatar: "🧳", text: "环境优雅，没有烟味。" })], notes: [] },
+  { id: 402, name: "外婆家（湖滨店）", type: "餐厅", city: "杭州市", address: "湖滨路 88 号", distance: "950m", reviewCount: 1820, smokeReports: 6, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "10:30 - 22:00", phone: "0571-8798 6666", reviews: [seedReview({ user: "杭帮菜", avatar: "🍚", text: "包厢也禁烟。" })], notes: [] },
+  { id: 403, name: "晓风书屋", type: "书店", city: "杭州市", address: "体育场路 530 号", distance: "1.4km", reviewCount: 320, smokeReports: 0, tags: ["阅读区无烟"], img: TYPE_IMG["书店"], businessHours: "09:00 - 22:00", phone: "0571-8556 0000", reviews: [seedReview({ user: "西子书友", avatar: "📚", text: "安静无烟，适合看书。" })], notes: [] },
+
+  // 成都市
+  { id: 501, name: "陈麻婆豆腐", type: "餐厅", city: "成都市", address: "青华路 10 号", distance: "1.3km", reviewCount: 1450, smokeReports: 4, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "10:30 - 22:00", phone: "028-8754 8088", reviews: [seedReview({ user: "巴蜀食客", avatar: "🌶️", text: "大堂无烟，吃得安心。" })], notes: [] },
+  { id: 502, name: "太古里", type: "商场", city: "成都市", address: "中纱帽街", distance: "700m", reviewCount: 1120, smokeReports: 8, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "028-8665 6688", reviews: [seedReview({ user: "蓉城逛街", avatar: "🛍️", text: "户外通风很好。" })], notes: [] },
+  { id: 503, name: "方所书店", type: "书店", city: "成都市", address: "中纱帽街 8 号", distance: "750m", reviewCount: 540, smokeReports: 0, tags: ["阅读区无烟"], img: TYPE_IMG["书店"], businessHours: "10:00 - 22:00", phone: "028-8669 1525", reviews: [seedReview({ user: "成都书友", avatar: "📚", text: "空气安静干净。" })], notes: [] },
+
+  // 武汉市
+  { id: 601, name: "蔡林记（江汉路店）", type: "餐厅", city: "武汉市", address: "江汉路 55 号", distance: "880m", reviewCount: 760, smokeReports: 3, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "06:30 - 21:00", phone: "027-8281 2345", reviews: [seedReview({ user: "热干面爱好者", avatar: "🍜", text: "店里无烟，舒服。" })], notes: [] },
+  { id: 602, name: "楚河汉街", type: "商场", city: "武汉市", address: "中北路 86 号", distance: "1.2km", reviewCount: 920, smokeReports: 7, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "027-8788 8888", reviews: [seedReview({ user: "江城逛街", avatar: "🛍️", text: "中庭通风好。" })], notes: [] },
+  { id: 603, name: "武汉光谷凯悦酒店", type: "酒店", city: "武汉市", address: "高新大道 989 号", distance: "3.0km", reviewCount: 280, smokeReports: 1, tags: ["无烟楼层"], img: TYPE_IMG["酒店"], businessHours: "全天 24 小时", phone: "027-8773 1234", reviews: [seedReview({ user: "差旅党", avatar: "🧳", text: "无烟楼层执行到位。" })], notes: [] },
+
+  // 南京市
+  { id: 701, name: "南京大牌档（新街口店）", type: "餐厅", city: "南京市", address: "中山路 79 号", distance: "650m", reviewCount: 1320, smokeReports: 5, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "10:00 - 22:00", phone: "025-8470 8888", reviews: [seedReview({ user: "金陵味道", avatar: "🦆", text: "大堂禁烟，环境很好。" })], notes: [] },
+  { id: 702, name: "德基广场", type: "商场", city: "南京市", address: "中山路 18 号", distance: "400m", reviewCount: 1010, smokeReports: 6, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "025-8470 0000", reviews: [seedReview({ user: "南京逛街", avatar: "🛍️", text: "通风很好。" })], notes: [] },
+  { id: 703, name: "先锋书店（五台山店）", type: "书店", city: "南京市", address: "广州路 173 号", distance: "1.1km", reviewCount: 690, smokeReports: 0, tags: ["阅读区无烟"], img: TYPE_IMG["书店"], businessHours: "09:00 - 22:00", phone: "025-8328 0006", reviews: [seedReview({ user: "南京书友", avatar: "📚", text: "完全没有烟味。" })], notes: [] },
 ];
 
 const NOTE_IMG: Record<Exclude<Category, "全部">, string> = {
   ...TYPE_IMG,
 };
 const SEED_NOTES: NoteItem[] = [
-  { id: "n1", user: "清新呼吸", avatar: "🍃", time: "10 分钟前", placeName: "% Arabica 咖啡（武康路）", placeType: "咖啡馆", placeArea: "徐汇 · 武康路", cover: TYPE_IMG["咖啡馆"], text: "店里有明显禁烟标志，整个空间都很清新，拍照也好看。", tags: ["禁烟标志", "无烟友好"], likes: 28, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n2", user: "奶茶星人", avatar: "🧋", time: "32 分钟前", placeName: "喜茶 LAB（张园店）", placeType: "奶茶店", placeArea: "静安 · 张园", cover: TYPE_IMG["奶茶店"], text: "排队区在户外，但室内完全没有烟味，店员会提醒不要吸烟。", tags: ["无烟友好", "店员劝阻"], likes: 41, isLiked: true, isCollected: false, pointAward: 10 },
-  { id: "n3", user: "唱歌不抽烟", avatar: "🎤", time: "1 小时前", placeName: "纯K（静安店）", placeType: "KTV", placeArea: "静安 · 愚园路", cover: TYPE_IMG["KTV"], text: "包厢里有残留烟味，开了通风后好一些，希望店家加强劝阻。", tags: ["有烟味反馈"], likes: 12, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n4", user: "周末逛街", avatar: "🛍️", time: "2 小时前", placeName: "兴业太古汇", placeType: "商场", placeArea: "静安 · 南京西路", cover: TYPE_IMG["商场"], text: "入口附近有人吸烟，但中庭通风做得很好，整体还可以接受。", tags: ["有烟味反馈", "图片笔记"], likes: 9, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n5", user: "电影迷", avatar: "🎬", time: "3 小时前", placeName: "万达影城（大宁店）", placeType: "电影院", placeArea: "静安 · 共和新路", cover: TYPE_IMG["电影院"], text: "大厅有禁烟提示，观影区完全无烟，体验很好。", tags: ["禁烟标志", "无烟友好"], likes: 17, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n6", user: "撸铁选手", avatar: "🏋️", time: "5 小时前", placeName: "威尔士健身（静安店）", placeType: "健身房", placeArea: "静安 · 南京西路", cover: TYPE_IMG["健身房"], text: "门口偶尔有人抽烟，进了室内空气很好，更衣室也清新。", tags: ["无烟友好"], likes: 22, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n7", user: "书页香", avatar: "📚", time: "昨天", placeName: "茑屋书店（上生·新所）", placeType: "书店", placeArea: "长宁 · 延安西路", cover: TYPE_IMG["书店"], text: "完全没有闻到烟味，环境安静，是看书的好地方。", tags: ["无烟友好", "禁烟标志"], likes: 35, isLiked: false, isCollected: true, pointAward: 10 },
-  { id: "n8", user: "小笼控", avatar: "🥟", time: "昨天", placeName: "鼎泰丰（南京西路店）", placeType: "餐厅", placeArea: "静安 · 南京西路", cover: TYPE_IMG["餐厅"], text: "包间也是全程禁烟，店员会主动劝阻顾客。", tags: ["店员劝阻", "无烟友好"], likes: 19, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n9", user: "差旅日常", avatar: "🧳", time: "2 天前", placeName: "上海静安瑞吉酒店", placeType: "酒店", placeArea: "静安 · 石门一路", cover: TYPE_IMG["酒店"], text: "无烟楼层执行很到位，大堂也清爽，住得很舒适。", tags: ["无烟友好"], likes: 26, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n10", user: "通勤打工人", avatar: "💼", time: "2 天前", placeName: "凯德 Mall 写字楼大厅", placeType: "写字楼", placeArea: "静安 · 愚园路", cover: TYPE_IMG["写字楼"], text: "电梯口偶尔有人吸烟，建议加装禁烟提示。", tags: ["有烟味反馈"], likes: 7, isLiked: false, isCollected: false, pointAward: 10 },
-  { id: "n11", user: "拿铁拿铁", avatar: "☕", time: "3 天前", placeName: "% Arabica 咖啡（武康路）", placeType: "咖啡馆", placeArea: "徐汇 · 武康路", cover: TYPE_IMG["咖啡馆"], text: "工作人员看到有人想抽烟会立刻劝阻，体验非常棒。", tags: ["店员劝阻", "无烟友好"], likes: 31, isLiked: true, isCollected: false, pointAward: 10 },
-  { id: "n12", user: "夜归人", avatar: "🌙", time: "3 天前", placeName: "纯K（静安店）", placeType: "KTV", placeArea: "静安 · 愚园路", cover: TYPE_IMG["KTV"], text: "包厢禁烟标志在墙上比较显眼，但还是有客人偷偷抽。", tags: ["禁烟标志", "有烟味反馈"], likes: 14, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n1", user: "清新呼吸", avatar: "🍃", time: "10 分钟前", placeName: "M Stand 咖啡", placeType: "咖啡馆", placeArea: "上海市", cover: TYPE_IMG["咖啡馆"], text: "店里有明显禁烟标志，整个空间都很清新，拍照也好看。", tags: ["禁烟标志", "无烟友好"], likes: 28, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n2", user: "奶茶星人", avatar: "🧋", time: "32 分钟前", placeName: "喜茶 LAB（张园店）", placeType: "奶茶店", placeArea: "上海市", cover: TYPE_IMG["奶茶店"], text: "排队区在户外，但室内完全没有烟味，店员会提醒不要吸烟。", tags: ["无烟友好", "店员劝阻"], likes: 41, isLiked: true, isCollected: false, pointAward: 10 },
+  { id: "n3", user: "唱歌不抽烟", avatar: "🎤", time: "1 小时前", placeName: "纯K", placeType: "KTV", placeArea: "上海市", cover: TYPE_IMG["KTV"], text: "包厢里有残留烟味，开了通风后好一些，希望店家加强劝阻。", tags: ["有烟味反馈"], likes: 12, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n4", user: "周末逛街", avatar: "🛍️", time: "2 小时前", placeName: "兴业太古汇", placeType: "商场", placeArea: "上海市", cover: TYPE_IMG["商场"], text: "入口附近有人吸烟，但中庭通风做得很好，整体还可以接受。", tags: ["有烟味反馈", "图片笔记"], likes: 9, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n5", user: "电影迷", avatar: "🎬", time: "3 小时前", placeName: "万达影城（大宁店）", placeType: "电影院", placeArea: "上海市", cover: TYPE_IMG["电影院"], text: "大厅有禁烟提示，观影区完全无烟，体验很好。", tags: ["禁烟标志", "无烟友好"], likes: 17, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n6", user: "撸铁选手", avatar: "🏋️", time: "5 小时前", placeName: "威尔士健身", placeType: "健身房", placeArea: "上海市", cover: TYPE_IMG["健身房"], text: "门口偶尔有人抽烟，进了室内空气很好，更衣室也清新。", tags: ["无烟友好"], likes: 22, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n7", user: "书页香", avatar: "📚", time: "昨天", placeName: "茑屋书店（上生·新所）", placeType: "书店", placeArea: "上海市", cover: TYPE_IMG["书店"], text: "完全没有闻到烟味，环境安静，是看书的好地方。", tags: ["无烟友好", "禁烟标志"], likes: 35, isLiked: false, isCollected: true, pointAward: 10 },
+  { id: "n8", user: "京味咖啡", avatar: "☕", time: "昨天", placeName: "Seesaw 咖啡（三里屯店）", placeType: "咖啡馆", placeArea: "北京市", cover: TYPE_IMG["咖啡馆"], text: "店员劝阻很到位，整个空间无烟。", tags: ["店员劝阻", "无烟友好"], likes: 19, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n9", user: "鹏城拿铁", avatar: "🌆", time: "2 天前", placeName: "% Arabica（万象天地店）", placeType: "咖啡馆", placeArea: "深圳市", cover: TYPE_IMG["咖啡馆"], text: "深圳的店通风好，没有烟味。", tags: ["无烟友好"], likes: 26, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n10", user: "蓉城逛街", avatar: "🐼", time: "2 天前", placeName: "太古里", placeType: "商场", placeArea: "成都市", cover: TYPE_IMG["商场"], text: "户外街区通风很好，室内空气也不错。", tags: ["无烟友好"], likes: 17, isLiked: false, isCollected: false, pointAward: 10 },
+  { id: "n11", user: "西子书友", avatar: "📖", time: "3 天前", placeName: "晓风书屋", placeType: "书店", placeArea: "杭州市", cover: TYPE_IMG["书店"], text: "店里安静干净，是看书的好地方。", tags: ["禁烟标志", "无烟友好"], likes: 31, isLiked: true, isCollected: false, pointAward: 10 },
+  { id: "n12", user: "夜归人", avatar: "🌙", time: "3 天前", placeName: "纯K", placeType: "KTV", placeArea: "上海市", cover: TYPE_IMG["KTV"], text: "包厢禁烟标志在墙上比较显眼，但还是有客人偷偷抽。", tags: ["禁烟标志", "有烟味反馈"], likes: 14, isLiked: false, isCollected: false, pointAward: 10 },
 ];
 
 type Page =
   | "login" | "phoneLogin" | "home" | "list" | "search" | "category" | "detail"
-  | "publish" | "review" | "note" | "myNotes"
+  | "publish" | "review" | "note" | "myNotes" | "noteDetail"
   | "rank" | "me" | "favorites" | "history" | "points"
-  | "addPlace" | "report" | "correction" | "help" | "settings" | "withdraw";
+  | "addPlace" | "report" | "correction" | "help" | "settings" | "withdraw" | "citySelect";
 
 type Tab = "home" | "rank" | "publish" | "notes" | "me";
 type SortKey = "default" | "distance" | "score" | "reviews" | "smoke";
@@ -286,7 +322,9 @@ export default function Index() {
   const [allNotes, setAllNotes] = useState<NoteItem[]>(SEED_NOTES);
   const myNotes = useMemo(() => allNotes.filter(n => n.user === "我"), [allNotes]);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [city, setCity] = useState("上海市 静安区");
+  const [city, setCity] = useState("上海市");
+  const [activeNote, setActiveNote] = useState<NoteItem | null>(null);
+  const [cityReturnPage, setCityReturnPage] = useState<Page>("home");
   const [fontSize, setFontSize] = useState<FontSize>("standard");
   const [notifyOn, setNotifyOn] = useState(true);
   const [searchSort, setSearchSort] = useState<SortKey>("default");
@@ -353,7 +391,7 @@ export default function Index() {
       // create lightweight place entry
       const id = Math.max(...places.map(p => p.id)) + 1;
       const np: Place = {
-        id, name: data.name, type: data.type, address: city,
+        id, name: data.name, type: data.type, city, address: city,
         distance: `${(Math.random() * 2 + 0.2).toFixed(1)}km`,
         reviewCount: 1, smokeReports: 0,
         tags: ["待审核"], img: TYPE_IMG[data.type] || TYPE_IMG["咖啡馆"],
@@ -395,7 +433,7 @@ export default function Index() {
   const submitNewPlace = (data: { name: string; type: Exclude<Category, "全部">; address: string }) => {
     const id = Math.max(...places.map(p => p.id)) + 1;
     const np: Place = {
-      id, name: data.name, type: data.type, address: data.address,
+      id, name: data.name, type: data.type, city, address: data.address,
       distance: `${(Math.random() * 2 + 0.2).toFixed(1)}km`,
       reviewCount: 0, smokeReports: 0,
       tags: ["待审核"], img: TYPE_IMG[data.type] || TYPE_IMG["咖啡馆"],
@@ -462,16 +500,37 @@ export default function Index() {
 
   const showBottomTab = ["home", "rank", "publish", "myNotes", "me"].includes(page);
 
+  // 当前城市的场所
+  const cityPlaces = useMemo(() => places.filter(p => p.city === city), [places, city]);
+
+  const openCitySelect = (returnTo: Page = "home") => {
+    setCityReturnPage(returnTo);
+    setPage("citySelect");
+  };
+  const onCityChosen = (newCity: string) => {
+    setCity(newCity);
+    toast.success(`已切换到 ${newCity}`);
+    setPage(cityReturnPage === "citySelect" ? "home" : cityReturnPage);
+    if (cityReturnPage === "home") setTab("home");
+  };
+
+  // 标题映射
+  const titleMap: Partial<Record<Page, string>> = {
+    home: "空气点评", rank: "无烟榜单", publish: "发布",
+    myNotes: "笔记", me: "我的", login: "空气点评", phoneLogin: "登录",
+  };
+  const statusTitle = titleMap[page] || "空气点评";
+
   return (
-    <div className={`min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6 ${fontClass}`}>
-      <div className="relative w-full sm:max-w-[390px] min-h-screen sm:min-h-[844px] sm:rounded-[2.5rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
-        <div className="hidden sm:flex h-7 items-center justify-between px-6 text-[11px] text-foreground/70 bg-background">
-          <span>9:41</span>
-          <span className="font-medium">空气点评</span>
+    <div className={`min-h-screen w-full bg-[#f3f4f6] flex justify-center items-center sm:py-4 ${fontClass}`}>
+      <div className="relative w-full sm:w-[390px] h-[100vh] sm:h-[844px] sm:max-h-[100vh] sm:rounded-[2rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
+        <div className="h-11 flex items-center justify-between px-6 text-[12px] text-foreground/80 bg-background shrink-0">
+          <span className="font-medium">9:41</span>
+          <span className="font-medium">{statusTitle}</span>
           <span>100%</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden phone-scroll" style={{ paddingBottom: showBottomTab ? "5rem" : "0" }}>
           {page === "login" && (
             <Login
               onQuickLogin={() => { setPage("home"); setTab("home"); setShowOnboarding(true); toast.success("欢迎使用空气点评"); }}
@@ -488,8 +547,9 @@ export default function Index() {
             <HomePage
               search={search} setSearch={setSearch}
               city={city}
+              onCityClick={() => openCitySelect("home")}
               setFilterCat={(c) => { setFilterCat(c); setCatSort("default"); setPage("category"); }}
-              places={places.slice(0, 6)} onPlace={goPlace}
+              places={cityPlaces.slice(0, 6)} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onSeeAll={() => setPage("list")}
               onSearchSubmit={() => setPage("search")}
@@ -499,7 +559,7 @@ export default function Index() {
             <ListPage
               filterCat={filterCat} setFilterCat={setFilterCat}
               search={search} setSearch={setSearch}
-              places={places.filter(p =>
+              places={cityPlaces.filter(p =>
                 (filterCat === "全部" || p.type === filterCat) &&
                 (search.trim() === "" || p.name.includes(search) || p.type.includes(search))
               )}
@@ -512,7 +572,7 @@ export default function Index() {
             <SearchPage
               search={search} setSearch={setSearch}
               sort={searchSort} setSort={setSearchSort}
-              places={places} onPlace={goPlace}
+              places={cityPlaces} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onBack={() => setPage("home")}
               onAdd={() => setPage("addPlace")}
@@ -523,7 +583,7 @@ export default function Index() {
               cat={filterCat === "全部" ? "餐厅" : filterCat as Exclude<Category, "全部">}
               setCat={(c) => setFilterCat(c)}
               sort={catSort} setSort={setCatSort}
-              places={places} onPlace={goPlace}
+              places={cityPlaces} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onBack={() => setPage("home")}
             />
@@ -556,7 +616,7 @@ export default function Index() {
           )}
           {page === "note" && (
             <NotePage
-              places={places} initialPlaceId={activePlace?.id}
+              places={cityPlaces.length > 0 ? cityPlaces : places} initialPlaceId={activePlace?.id}
               onBack={() => setPage(activePlace ? "detail" : "publish")}
               onSubmit={submitNote}
             />
@@ -565,8 +625,17 @@ export default function Index() {
             <NotesPlazaPage
               notes={allNotes}
               onGoNote={() => setPage("note")}
+              onOpen={(n) => { setActiveNote(n); setPage("noteDetail"); }}
               onToggleLike={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isLiked: !n.isLiked, likes: (n.likes || 0) + (n.isLiked ? -1 : 1) } : n))}
               onToggleCollect={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isCollected: !n.isCollected } : n))}
+            />
+          )}
+          {page === "noteDetail" && activeNote && (
+            <NoteDetailPage
+              note={activeNote}
+              onBack={() => setPage("myNotes")}
+              onToggleLike={() => setAllNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, isLiked: !n.isLiked, likes: (n.likes || 0) + (n.isLiked ? -1 : 1) } : n))}
+              onToggleCollect={() => setAllNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, isCollected: !n.isCollected } : n))}
             />
           )}
           {page === "addPlace" && (
@@ -583,12 +652,13 @@ export default function Index() {
             <CorrectionPage place={activePlace} onBack={() => setPage("detail")} />
           )}
           {page === "rank" && (
-            <RankPage places={places} onPlace={goPlace} favorites={favorites} onFav={toggleFav} />
+            <RankPage city={city} places={cityPlaces} onPlace={goPlace} favorites={favorites} onFav={toggleFav} />
           )}
           {page === "me" && (
             <MePage
               points={points} favCount={favorites.length} historyCount={history.length}
               city={city}
+              onCityClick={() => openCitySelect("me")}
               onWithdraw={() => setPage("withdraw")}
               onPoints={() => setPage("points")}
               onFavorites={() => setPage("favorites")}
@@ -630,9 +700,17 @@ export default function Index() {
           {page === "settings" && (
             <SettingsPage
               fontSize={fontSize} setFontSize={setFontSize}
-              city={city} setCity={setCity}
+              city={city}
+              onCityClick={() => openCitySelect("settings")}
               notifyOn={notifyOn} setNotifyOn={setNotifyOn}
               onBack={() => setPage("me")}
+            />
+          )}
+          {page === "citySelect" && (
+            <CitySelectPage
+              city={city}
+              onBack={() => setPage(cityReturnPage)}
+              onPick={onCityChosen}
             />
           )}
         </div>
@@ -823,6 +901,7 @@ function PlaceCard({ p, fav, onFav, onClick }: { p: Place; fav: boolean; onFav: 
 function HomePage(props: {
   search: string; setSearch: (v: string) => void;
   city?: string;
+  onCityClick?: () => void;
   setFilterCat: (c: Category) => void;
   places: Place[]; onPlace: (p: Place) => void;
   favorites: number[]; onFav: (id: number) => void;
@@ -833,9 +912,9 @@ function HomePage(props: {
     <div>
       <div className="bg-gradient-to-b from-primary-soft to-background px-4 pt-4 pb-3">
         <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-1 text-foreground font-medium">
-            <MapPin className="w-4 h-4 text-primary" /> {props.city || "上海市 静安区"} <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </div>
+          <button onClick={props.onCityClick} className="flex items-center gap-1 text-foreground font-medium active:opacity-70">
+            <MapPin className="w-4 h-4 text-primary" /> {props.city || "上海市"} <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          </button>
           <Bell className="w-5 h-5 text-muted-foreground" />
         </div>
         <form
@@ -1381,8 +1460,48 @@ function NotePage({ places, initialPlaceId, onBack, onSubmit }: {
 const NOTE_FILTERS = ["全部", "无烟友好", "有烟味反馈", "禁烟标志", "店员劝阻", "图片笔记"] as const;
 type NoteFilter = typeof NOTE_FILTERS[number];
 
-function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
+function NoteGridCard({ n, onLike, onCollect, onClick }: { n: NoteItem; onLike?: () => void; onCollect?: () => void; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden cursor-pointer active:scale-[0.99] transition flex flex-col">
+      <div className="relative">
+        <PlaceImg src={n.cover} type={n.placeType} alt={n.placeName} className="w-full h-[120px] object-cover bg-secondary" />
+        {n.pointAward && (
+          <span className="absolute top-1.5 right-1.5 text-[10px] text-accent bg-card/95 px-1.5 py-0.5 rounded-full shadow-sm">+{n.pointAward}</span>
+        )}
+      </div>
+      <div className="p-2 flex-1 flex flex-col gap-1">
+        <p className="text-[12px] leading-snug line-clamp-2 text-foreground">{n.text}</p>
+        <div className="text-[10px] text-muted-foreground flex items-center gap-0.5 line-clamp-1">
+          <MapPin className="w-3 h-3 shrink-0" /><span className="truncate">{n.placeName}</span>
+        </div>
+        {n.tags.length > 0 && (
+          <div className="flex gap-1 flex-wrap">
+            {n.tags.slice(0, 2).map(t => <span key={t} className="text-[9px] text-primary bg-primary-soft px-1.5 py-0.5 rounded-full truncate max-w-full">#{t}</span>)}
+          </div>
+        )}
+        <div className="flex items-center justify-between mt-auto pt-1">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-sm">{n.avatar}</span>
+            <span className="text-[10px] text-muted-foreground truncate">{n.user}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={(e) => { e.stopPropagation(); onLike?.(); }} className="flex items-center gap-0.5 active:scale-95">
+              <ThumbsUp className={`w-3.5 h-3.5 ${n.isLiked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+              <span className={`text-[10px] ${n.isLiked ? "text-primary" : "text-muted-foreground"}`}>{n.likes ?? 0}</span>
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onCollect?.(); }} className="active:scale-95">
+              <Bookmark className={`w-3.5 h-3.5 ${n.isCollected ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NotesPlazaPage({ notes, onGoNote, onOpen, onToggleLike, onToggleCollect }: {
   notes: NoteItem[]; onGoNote: () => void;
+  onOpen?: (n: NoteItem) => void;
   onToggleLike: (id: string) => void; onToggleCollect: (id: string) => void;
 }) {
   const [kw, setKw] = useState("");
@@ -1406,10 +1525,10 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
 
   return (
     <div>
-      <div className="px-4 pt-5 pb-3 bg-gradient-to-b from-primary-soft to-background">
+      <div className="px-4 pt-4 pb-3 bg-gradient-to-b from-primary-soft to-background">
         <h1 className="text-xl font-bold">笔记</h1>
-        <p className="text-xs text-muted-foreground mt-1">看看大家分享的场所空气体验</p>
-        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl border border-border px-3 h-11">
+        <p className="text-xs text-muted-foreground mt-0.5">看看大家分享的场所空气体验</p>
+        <div className="mt-3 flex items-center gap-2 bg-card rounded-2xl border border-border px-3 h-10">
           <Search className="w-4 h-4 text-muted-foreground" />
           <input
             value={kw}
@@ -1419,7 +1538,7 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
           />
           {kw && <button onClick={() => setKw("")}><X className="w-4 h-4 text-muted-foreground" /></button>}
         </div>
-        <div className="mt-3 -mx-4 px-4 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
           {NOTE_FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`shrink-0 px-3 h-8 rounded-full text-xs border transition ${
@@ -1431,7 +1550,7 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-3">
         {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <FileText className="w-12 h-12 text-muted-foreground opacity-40 mb-3" />
@@ -1444,12 +1563,17 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
               去发笔记
             </button>
           </div>
-        ) : list.map(n => (
-          <NoteCard key={n.id} n={n}
-            onLike={() => onToggleLike(n.id)}
-            onCollect={() => onToggleCollect(n.id)}
-          />
-        ))}
+        ) : (
+          <div className="grid grid-cols-2 gap-2.5">
+            {list.map(n => (
+              <NoteGridCard key={n.id} n={n}
+                onClick={() => onOpen?.(n)}
+                onLike={() => onToggleLike(n.id)}
+                onCollect={() => onToggleCollect(n.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1457,7 +1581,7 @@ function NotesPlazaPage({ notes, onGoNote, onToggleLike, onToggleCollect }: {
 
 /* =================== Rank =================== */
 
-function RankPage({ places, onPlace, favorites, onFav }: { places: Place[]; onPlace: (p: Place) => void; favorites: number[]; onFav: (id: number) => void; }) {
+function RankPage({ city, places, onPlace, favorites, onFav }: { city?: string; places: Place[]; onPlace: (p: Place) => void; favorites: number[]; onFav: (id: number) => void; }) {
   const [tab, setTab] = useState<"clean" | "improve">("clean");
   const list = useMemo(() => {
     const arr = places.map(p => ({ p, score: placeAvgScore(p) }));
@@ -1469,7 +1593,7 @@ function RankPage({ places, onPlace, favorites, onFav }: { places: Place[]; onPl
   return (
     <div>
       <div className="bg-gradient-to-b from-primary to-primary-glow text-primary-foreground px-4 pt-5 pb-12">
-        <h1 className="text-xl font-bold flex items-center gap-2"><Trophy className="w-5 h-5" /> 无烟榜单</h1>
+        <h1 className="text-xl font-bold flex items-center gap-2"><Trophy className="w-5 h-5" /> {city || "上海市"}无烟榜单</h1>
         <p className="text-xs opacity-90 mt-1">来自空气守护者们的真实评价</p>
       </div>
       <div className="-mt-8 mx-4 bg-card rounded-2xl shadow-sm border border-border p-1 flex">
@@ -1526,8 +1650,9 @@ function MeRow({ icon: Icon, label, value, onClick, accent }: { icon: any; label
   );
 }
 
-function MePage({ points, favCount, historyCount, city, onWithdraw, onPoints, onFavorites, onHistory, onAddPlace, onHelp, onSettings, onLogout }: {
+function MePage({ points, favCount, historyCount, city, onCityClick, onWithdraw, onPoints, onFavorites, onHistory, onAddPlace, onHelp, onSettings, onLogout }: {
   points: number; favCount: number; historyCount: number; city?: string;
+  onCityClick?: () => void;
   onWithdraw: () => void; onPoints: () => void; onFavorites: () => void; onHistory: () => void;
   onAddPlace?: () => void; onHelp?: () => void; onSettings?: () => void; onLogout: () => void;
 }) {
@@ -1538,9 +1663,9 @@ function MePage({ points, favCount, historyCount, city, onWithdraw, onPoints, on
           <div className="w-16 h-16 rounded-full bg-card text-primary flex items-center justify-center text-2xl shadow-md">🌿</div>
           <div className="flex-1 min-w-0">
             <div className="font-bold text-lg">空气守护者</div>
-            <div className="text-xs opacity-90 flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3" /> {city || "上海市 · 静安区"}
-            </div>
+            <button onClick={onCityClick} className="text-xs opacity-90 flex items-center gap-1 mt-0.5 active:opacity-70">
+              <MapPin className="w-3 h-3" /> {city || "上海市"} <ChevronDown className="w-3 h-3" />
+            </button>
           </div>
           <button onClick={onWithdraw}
             className="px-4 h-9 rounded-full bg-card/20 backdrop-blur text-primary-foreground text-sm font-medium border border-card/30 inline-flex items-center gap-1 active:scale-95">
