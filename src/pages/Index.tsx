@@ -154,7 +154,7 @@ const seedReview = (p: Partial<ReviewItem>): ReviewItem => {
 const PLACES_INIT: Place[] = [
   {
     id: 1, name: "M Stand 咖啡（兴业太古汇店）", type: "咖啡馆",
-    address: "南京西路 789 号", distance: "320m",
+    city: "上海市", address: "南京西路 789 号", distance: "320m",
     reviewCount: 286, smokeReports: 2,
     tags: ["全店无烟", "空气清爽", "有提示牌"], img: TYPE_IMG["咖啡馆"],
     businessHours: "08:00 - 22:00", phone: "021-6288 1234",
@@ -165,7 +165,7 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 2, name: "鼎泰丰（恒隆店）", type: "餐厅",
-    address: "恒隆广场 6F", distance: "510m",
+    city: "上海市", address: "恒隆广场 6F", distance: "510m",
     reviewCount: 1024, smokeReports: 5,
     tags: ["室内无烟", "工作人员劝阻"], img: TYPE_IMG["餐厅"],
     businessHours: "10:30 - 22:00", phone: "021-6279 9999",
@@ -173,15 +173,15 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 3, name: "兴业太古汇", type: "商场",
-    address: "南京西路 789 号", distance: "300m",
+    city: "上海市", address: "南京西路 789 号", distance: "300m",
     reviewCount: 532, smokeReports: 8,
     tags: ["公共区无烟", "通风良好"], img: TYPE_IMG["商场"],
     businessHours: "10:00 - 22:00", phone: "021-2230 8888",
     reviews: [seedReview({ user: "周末逛街", avatar: "🛍️", text: "中庭通风很好，没有闻到烟味。" })], notes: [],
   },
   {
-    id: 4, name: "上海静安瑞吉酒店", type: "酒店",
-    address: "石门一路 288 号", distance: "1.2km",
+    id: 4, name: "上海瑞吉酒店", type: "酒店",
+    city: "上海市", address: "石门一路 288 号", distance: "1.2km",
     reviewCount: 412, smokeReports: 3,
     tags: ["无烟楼层", "大堂无烟"], img: TYPE_IMG["酒店"],
     businessHours: "全天 24 小时", phone: "021-2287 3000",
@@ -189,23 +189,23 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 5, name: "万达影城（大宁店）", type: "电影院",
-    address: "共和新路 1898 号", distance: "2.4km",
+    city: "上海市", address: "共和新路 1898 号", distance: "2.4km",
     reviewCount: 766, smokeReports: 12,
     tags: ["影厅无烟", "走廊偶有烟味"], img: TYPE_IMG["电影院"],
     businessHours: "10:00 - 次日 01:00", phone: "021-5696 5555",
     reviews: [seedReview({ user: "电影迷", avatar: "🎬", smell: "有", staff: "没看到", text: "影厅没烟，但走廊偶尔能闻到。" })], notes: [],
   },
   {
-    id: 6, name: "纯K（静安店）", type: "KTV",
-    address: "愚园路 68 号", distance: "1.8km",
+    id: 6, name: "纯K", type: "KTV",
+    city: "上海市", address: "愚园路 68 号", distance: "1.8km",
     reviewCount: 198, smokeReports: 47,
     tags: ["包厢有烟味", "缺少劝阻"], img: TYPE_IMG["KTV"],
     businessHours: "12:00 - 次日 02:00", phone: "021-6248 1111",
     reviews: [seedReview({ user: "唱歌不抽烟", avatar: "🎤", sign: "无", smoker: "有", smell: "有", staff: "无", text: "包厢里烟味较重。" })], notes: [],
   },
   {
-    id: 7, name: "威尔士健身（静安店）", type: "健身房",
-    address: "南京西路 1266 号", distance: "640m",
+    id: 7, name: "威尔士健身", type: "健身房",
+    city: "上海市", address: "南京西路 1266 号", distance: "640m",
     reviewCount: 321, smokeReports: 1,
     tags: ["全场无烟", "更衣室清新"], img: TYPE_IMG["健身房"],
     businessHours: "06:00 - 23:00", phone: "021-6133 0000",
@@ -213,7 +213,7 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 8, name: "茑屋书店（上生·新所）", type: "书店",
-    address: "延安西路 1262 号", distance: "3.1km",
+    city: "上海市", address: "延安西路 1262 号", distance: "3.1km",
     reviewCount: 654, smokeReports: 0,
     tags: ["阅读区无烟", "空气安静"], img: TYPE_IMG["书店"],
     businessHours: "10:00 - 22:00", phone: "021-6248 8888",
@@ -221,20 +221,55 @@ const PLACES_INIT: Place[] = [
   },
   {
     id: 9, name: "喜茶 LAB（张园店）", type: "奶茶店",
-    address: "茂名北路 张园西区", distance: "880m",
+    city: "上海市", address: "茂名北路 张园西区", distance: "880m",
     reviewCount: 410, smokeReports: 4,
     tags: ["室内无烟", "有提示牌"], img: TYPE_IMG["奶茶店"],
     businessHours: "10:00 - 22:30", phone: "400-021-1234",
     reviews: [seedReview({ user: "奶茶星人", avatar: "🧋", text: "室内非常干净，没有烟味。" })], notes: [],
   },
   {
-    id: 10, name: "凯德 Mall（静安寺店）写字楼大厅", type: "写字楼",
-    address: "愚园路 168 号", distance: "1.0km",
+    id: 10, name: "凯德 Mall 写字楼大厅", type: "写字楼",
+    city: "上海市", address: "愚园路 168 号", distance: "1.0km",
     reviewCount: 156, smokeReports: 6,
     tags: ["大堂无烟", "电梯口偶有"], img: TYPE_IMG["写字楼"],
     businessHours: "07:00 - 22:00", phone: "021-3220 0000",
     reviews: [seedReview({ user: "通勤打工人", avatar: "💼", smell: "有", staff: "没看到", text: "大堂无烟，电梯口偶尔有人抽。" })], notes: [],
   },
+
+  // 北京市
+  { id: 101, name: "Seesaw 咖啡（三里屯店）", type: "咖啡馆", city: "北京市", address: "三里屯太古里南区", distance: "450m", reviewCount: 312, smokeReports: 3, tags: ["全店无烟", "环境清爽"], img: TYPE_IMG["咖啡馆"], businessHours: "08:00 - 22:00", phone: "010-6417 1234", reviews: [seedReview({ user: "京味咖啡", avatar: "☕", text: "店里禁烟标志很明显，空气很好。" })], notes: [] },
+  { id: 102, name: "全聚德（前门店）", type: "餐厅", city: "北京市", address: "前门大街 30 号", distance: "1.5km", reviewCount: 1280, smokeReports: 6, tags: ["大厅无烟", "包间无烟"], img: TYPE_IMG["餐厅"], businessHours: "11:00 - 22:00", phone: "010-6701 1888", reviews: [seedReview({ user: "胡同游", avatar: "🦆", text: "大厅完全没有烟味。" })], notes: [] },
+  { id: 103, name: "三里屯太古里", type: "商场", city: "北京市", address: "工体北路 19 号", distance: "300m", reviewCount: 980, smokeReports: 9, tags: ["公共区无烟", "通风良好"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "010-6417 6688", reviews: [seedReview({ user: "潮人逛街", avatar: "🛍️", text: "通风做得很好。" })], notes: [] },
+
+  // 深圳市
+  { id: 201, name: "% Arabica（万象天地店）", type: "咖啡馆", city: "深圳市", address: "深南大道 9668 号", distance: "520m", reviewCount: 410, smokeReports: 1, tags: ["全店无烟"], img: TYPE_IMG["咖啡馆"], businessHours: "08:00 - 22:00", phone: "0755-8888 1234", reviews: [seedReview({ user: "鹏城拿铁", avatar: "☕", text: "整个店无烟，体验非常好。" })], notes: [] },
+  { id: 202, name: "海底捞（万象城店）", type: "餐厅", city: "深圳市", address: "宝安南路 1881 号", distance: "1.1km", reviewCount: 2103, smokeReports: 4, tags: ["室内无烟", "工作人员劝阻"], img: TYPE_IMG["餐厅"], businessHours: "10:00 - 次日 02:00", phone: "0755-2580 0000", reviews: [seedReview({ user: "麻辣星人", avatar: "🍲", text: "室内全程无烟，舒服。" })], notes: [] },
+  { id: 203, name: "喜茶（深业上城店）", type: "奶茶店", city: "深圳市", address: "皇岗路 5001 号", distance: "780m", reviewCount: 612, smokeReports: 2, tags: ["室内无烟", "有提示牌"], img: TYPE_IMG["奶茶店"], businessHours: "10:00 - 22:30", phone: "400-021-1234", reviews: [seedReview({ user: "奶茶女孩", avatar: "🧋", text: "店里干净没有烟味。" })], notes: [] },
+
+  // 广州市
+  { id: 301, name: "陶陶居（北京路店）", type: "餐厅", city: "广州市", address: "北京路 388 号", distance: "600m", reviewCount: 1530, smokeReports: 5, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "07:00 - 22:00", phone: "020-8338 8888", reviews: [seedReview({ user: "早茶达人", avatar: "🥟", text: "早茶环境无烟很舒服。" })], notes: [] },
+  { id: 302, name: "天环广场", type: "商场", city: "广州市", address: "天河路 218 号", distance: "1.0km", reviewCount: 880, smokeReports: 7, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "020-3878 8888", reviews: [seedReview({ user: "羊城逛街", avatar: "🛍️", text: "通风很好。" })], notes: [] },
+  { id: 303, name: "广州瑰丽酒店", type: "酒店", city: "广州市", address: "珠江东路 222 号", distance: "2.0km", reviewCount: 360, smokeReports: 1, tags: ["无烟楼层", "大堂无烟"], img: TYPE_IMG["酒店"], businessHours: "全天 24 小时", phone: "020-8883 6688", reviews: [seedReview({ user: "差旅熟客", avatar: "🧳", text: "无烟楼层很安静。" })], notes: [] },
+
+  // 杭州市
+  { id: 401, name: "西湖国宾馆", type: "酒店", city: "杭州市", address: "杨公堤 18 号", distance: "1.8km", reviewCount: 290, smokeReports: 0, tags: ["无烟环境", "庭院清新"], img: TYPE_IMG["酒店"], businessHours: "全天 24 小时", phone: "0571-8797 9889", reviews: [seedReview({ user: "湖畔住客", avatar: "🧳", text: "环境优雅，没有烟味。" })], notes: [] },
+  { id: 402, name: "外婆家（湖滨店）", type: "餐厅", city: "杭州市", address: "湖滨路 88 号", distance: "950m", reviewCount: 1820, smokeReports: 6, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "10:30 - 22:00", phone: "0571-8798 6666", reviews: [seedReview({ user: "杭帮菜", avatar: "🍚", text: "包厢也禁烟。" })], notes: [] },
+  { id: 403, name: "晓风书屋", type: "书店", city: "杭州市", address: "体育场路 530 号", distance: "1.4km", reviewCount: 320, smokeReports: 0, tags: ["阅读区无烟"], img: TYPE_IMG["书店"], businessHours: "09:00 - 22:00", phone: "0571-8556 0000", reviews: [seedReview({ user: "西子书友", avatar: "📚", text: "安静无烟，适合看书。" })], notes: [] },
+
+  // 成都市
+  { id: 501, name: "陈麻婆豆腐", type: "餐厅", city: "成都市", address: "青华路 10 号", distance: "1.3km", reviewCount: 1450, smokeReports: 4, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "10:30 - 22:00", phone: "028-8754 8088", reviews: [seedReview({ user: "巴蜀食客", avatar: "🌶️", text: "大堂无烟，吃得安心。" })], notes: [] },
+  { id: 502, name: "太古里", type: "商场", city: "成都市", address: "中纱帽街", distance: "700m", reviewCount: 1120, smokeReports: 8, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "028-8665 6688", reviews: [seedReview({ user: "蓉城逛街", avatar: "🛍️", text: "户外通风很好。" })], notes: [] },
+  { id: 503, name: "方所书店", type: "书店", city: "成都市", address: "中纱帽街 8 号", distance: "750m", reviewCount: 540, smokeReports: 0, tags: ["阅读区无烟"], img: TYPE_IMG["书店"], businessHours: "10:00 - 22:00", phone: "028-8669 1525", reviews: [seedReview({ user: "成都书友", avatar: "📚", text: "空气安静干净。" })], notes: [] },
+
+  // 武汉市
+  { id: 601, name: "蔡林记（江汉路店）", type: "餐厅", city: "武汉市", address: "江汉路 55 号", distance: "880m", reviewCount: 760, smokeReports: 3, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "06:30 - 21:00", phone: "027-8281 2345", reviews: [seedReview({ user: "热干面爱好者", avatar: "🍜", text: "店里无烟，舒服。" })], notes: [] },
+  { id: 602, name: "楚河汉街", type: "商场", city: "武汉市", address: "中北路 86 号", distance: "1.2km", reviewCount: 920, smokeReports: 7, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "027-8788 8888", reviews: [seedReview({ user: "江城逛街", avatar: "🛍️", text: "中庭通风好。" })], notes: [] },
+  { id: 603, name: "武汉光谷凯悦酒店", type: "酒店", city: "武汉市", address: "高新大道 989 号", distance: "3.0km", reviewCount: 280, smokeReports: 1, tags: ["无烟楼层"], img: TYPE_IMG["酒店"], businessHours: "全天 24 小时", phone: "027-8773 1234", reviews: [seedReview({ user: "差旅党", avatar: "🧳", text: "无烟楼层执行到位。" })], notes: [] },
+
+  // 南京市
+  { id: 701, name: "南京大牌档（新街口店）", type: "餐厅", city: "南京市", address: "中山路 79 号", distance: "650m", reviewCount: 1320, smokeReports: 5, tags: ["大堂无烟"], img: TYPE_IMG["餐厅"], businessHours: "10:00 - 22:00", phone: "025-8470 8888", reviews: [seedReview({ user: "金陵味道", avatar: "🦆", text: "大堂禁烟，环境很好。" })], notes: [] },
+  { id: 702, name: "德基广场", type: "商场", city: "南京市", address: "中山路 18 号", distance: "400m", reviewCount: 1010, smokeReports: 6, tags: ["公共区无烟"], img: TYPE_IMG["商场"], businessHours: "10:00 - 22:00", phone: "025-8470 0000", reviews: [seedReview({ user: "南京逛街", avatar: "🛍️", text: "通风很好。" })], notes: [] },
+  { id: 703, name: "先锋书店（五台山店）", type: "书店", city: "南京市", address: "广州路 173 号", distance: "1.1km", reviewCount: 690, smokeReports: 0, tags: ["阅读区无烟"], img: TYPE_IMG["书店"], businessHours: "09:00 - 22:00", phone: "025-8328 0006", reviews: [seedReview({ user: "南京书友", avatar: "📚", text: "完全没有烟味。" })], notes: [] },
 ];
 
 const NOTE_IMG: Record<Exclude<Category, "全部">, string> = {
