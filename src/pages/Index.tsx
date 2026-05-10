@@ -1650,8 +1650,9 @@ function MeRow({ icon: Icon, label, value, onClick, accent }: { icon: any; label
   );
 }
 
-function MePage({ points, favCount, historyCount, city, onWithdraw, onPoints, onFavorites, onHistory, onAddPlace, onHelp, onSettings, onLogout }: {
+function MePage({ points, favCount, historyCount, city, onCityClick, onWithdraw, onPoints, onFavorites, onHistory, onAddPlace, onHelp, onSettings, onLogout }: {
   points: number; favCount: number; historyCount: number; city?: string;
+  onCityClick?: () => void;
   onWithdraw: () => void; onPoints: () => void; onFavorites: () => void; onHistory: () => void;
   onAddPlace?: () => void; onHelp?: () => void; onSettings?: () => void; onLogout: () => void;
 }) {
@@ -1662,9 +1663,9 @@ function MePage({ points, favCount, historyCount, city, onWithdraw, onPoints, on
           <div className="w-16 h-16 rounded-full bg-card text-primary flex items-center justify-center text-2xl shadow-md">🌿</div>
           <div className="flex-1 min-w-0">
             <div className="font-bold text-lg">空气守护者</div>
-            <div className="text-xs opacity-90 flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3" /> {city || "上海市 · 静安区"}
-            </div>
+            <button onClick={onCityClick} className="text-xs opacity-90 flex items-center gap-1 mt-0.5 active:opacity-70">
+              <MapPin className="w-3 h-3" /> {city || "上海市"} <ChevronDown className="w-3 h-3" />
+            </button>
           </div>
           <button onClick={onWithdraw}
             className="px-4 h-9 rounded-full bg-card/20 backdrop-blur text-primary-foreground text-sm font-medium border border-card/30 inline-flex items-center gap-1 active:scale-95">
