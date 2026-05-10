@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { connectPhantom, exchangePoints, getPhantom, POINTS_PER_EXCHANGE } from "@/lib/solana/exchange";
 import {
@@ -1251,14 +1251,39 @@ function ReviewPage({ place, city, onBack, onSubmit }: {
   const [smell, setSmell] = useState<"" | "有" | "无">("");
   const [staff, setStaff] = useState<"" | "是" | "否">("");
   const [text, setText] = useState("");
-  const [hasImg, setHasImg] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => { images.forEach(u => URL.revokeObjectURL(u)); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onPickFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+    if (!files.length) { e.target.value = ""; return; }
+    const remain = 3 - images.length;
+    const accepted = files.slice(0, Math.max(0, remain));
+    if (files.length > remain) toast.error("最多上传 3 张图片");
+    setImages(prev => [...prev, ...accepted.map(f => URL.createObjectURL(f))]);
+    e.target.value = "";
+  };
+  const removeImage = (i: number) => {
+    setImages(prev => {
+      URL.revokeObjectURL(prev[i]);
+      return prev.filter((_, idx) => idx !== i);
+    });
+  };
 
   const ready = name.trim() && type && sign && smoker && smell && staff;
 
   const handleSubmit = () => {
     if (!name.trim()) { toast.error("请输入场所名称"); return; }
     if (!type) { toast.error("请选择场所类型"); return; }
-    if (!sign || !smoker || !smell || !staff) { toast.error("请完成 4 个评价问题"); return; }
+    if (!sign) { toast.error("请选择是否看到无烟标志"); return; }
+    if (!smoker) { toast.error("请选择是否有人吸烟"); return; }
+    if (!smell) { toast.error("请选择是否有烟味"); return; }
+    if (!staff) { toast.error("请选择是否有人劝阻吸烟"); return; }
     onSubmit({
       sign: sign as any, smoker: smoker as any, smell: smell as any, staff: staff as any,
       name: name.trim(), type: type as Exclude<Category, "全部">, text,
@@ -1297,13 +1322,34 @@ function ReviewPage({ place, city, onBack, onSubmit }: {
         <ChoiceRow label="是否有人劝阻吸烟" options={["是", "否"] as const} value={staff} onChange={(v) => setStaff(v)} />
 
         <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="text-sm font-medium mb-1">上传场所图片（可选）</div>
+          <div className="text-sm font-medium mb-1">上传场所图片（可选，最多 3 张）</div>
           <p className="text-[11px] text-muted-foreground mb-3">可上传禁烟标志或场所环境图片</p>
-          <button onClick={() => { setHasImg(true); toast.success("图片已添加"); }}
-            className={`w-full aspect-[4/3] rounded-xl border border-dashed flex flex-col items-center justify-center text-muted-foreground transition ${hasImg ? "bg-primary-soft border-primary text-primary" : "bg-secondary border-border"}`}>
-            {hasImg ? <><Check className="w-7 h-7" /><span className="text-xs mt-1">已上传</span></>
-              : <><Camera className="w-7 h-7" /><span className="text-xs mt-1">添加图片</span></>}
-          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onPickFiles} />
+          {images.length === 0 ? (
+            <button onClick={() => fileInputRef.current?.click()}
+              className="w-full aspect-[4/3] rounded-xl border border-dashed border-primary/40 bg-primary-soft flex flex-col items-center justify-center text-primary transition active:scale-[0.99]">
+              <Camera className="w-7 h-7" />
+              <span className="text-xs mt-1">添加图片</span>
+            </button>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {images.map((src, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-secondary">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button onClick={() => removeImage(i)} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {images.length < 3 && (
+                <button onClick={() => fileInputRef.current?.click()}
+                  className="aspect-square rounded-xl border-2 border-dashed border-primary/40 bg-primary-soft flex flex-col items-center justify-center text-primary active:scale-95 transition">
+                  <Camera className="w-6 h-6" />
+                  <span className="text-[11px] mt-1">添加</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         <textarea
