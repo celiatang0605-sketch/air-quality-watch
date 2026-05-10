@@ -500,16 +500,37 @@ export default function Index() {
 
   const showBottomTab = ["home", "rank", "publish", "myNotes", "me"].includes(page);
 
+  // 当前城市的场所
+  const cityPlaces = useMemo(() => places.filter(p => p.city === city), [places, city]);
+
+  const openCitySelect = (returnTo: Page = "home") => {
+    setCityReturnPage(returnTo);
+    setPage("citySelect");
+  };
+  const onCityChosen = (newCity: string) => {
+    setCity(newCity);
+    toast.success(`已切换到 ${newCity}`);
+    setPage(cityReturnPage === "citySelect" ? "home" : cityReturnPage);
+    if (cityReturnPage === "home") setTab("home");
+  };
+
+  // 标题映射
+  const titleMap: Partial<Record<Page, string>> = {
+    home: "空气点评", rank: "无烟榜单", publish: "发布",
+    myNotes: "笔记", me: "我的", login: "空气点评", phoneLogin: "登录",
+  };
+  const statusTitle = titleMap[page] || "空气点评";
+
   return (
-    <div className={`min-h-screen w-full bg-muted/40 flex justify-center py-0 sm:py-6 ${fontClass}`}>
-      <div className="relative w-full sm:max-w-[390px] min-h-screen sm:min-h-[844px] sm:rounded-[2.5rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
-        <div className="hidden sm:flex h-7 items-center justify-between px-6 text-[11px] text-foreground/70 bg-background">
-          <span>9:41</span>
-          <span className="font-medium">空气点评</span>
+    <div className={`min-h-screen w-full bg-[#f3f4f6] flex justify-center items-center sm:py-4 ${fontClass}`}>
+      <div className="relative w-full sm:w-[390px] h-[100vh] sm:h-[844px] sm:max-h-[100vh] sm:rounded-[2rem] sm:shadow-2xl bg-background overflow-hidden flex flex-col">
+        <div className="h-11 flex items-center justify-between px-6 text-[12px] text-foreground/80 bg-background shrink-0">
+          <span className="font-medium">9:41</span>
+          <span className="font-medium">{statusTitle}</span>
           <span>100%</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden phone-scroll" style={{ paddingBottom: showBottomTab ? "5rem" : "0" }}>
           {page === "login" && (
             <Login
               onQuickLogin={() => { setPage("home"); setTab("home"); setShowOnboarding(true); toast.success("欢迎使用空气点评"); }}
@@ -526,8 +547,9 @@ export default function Index() {
             <HomePage
               search={search} setSearch={setSearch}
               city={city}
+              onCityClick={() => openCitySelect("home")}
               setFilterCat={(c) => { setFilterCat(c); setCatSort("default"); setPage("category"); }}
-              places={places.slice(0, 6)} onPlace={goPlace}
+              places={cityPlaces.slice(0, 6)} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onSeeAll={() => setPage("list")}
               onSearchSubmit={() => setPage("search")}
@@ -537,7 +559,7 @@ export default function Index() {
             <ListPage
               filterCat={filterCat} setFilterCat={setFilterCat}
               search={search} setSearch={setSearch}
-              places={places.filter(p =>
+              places={cityPlaces.filter(p =>
                 (filterCat === "全部" || p.type === filterCat) &&
                 (search.trim() === "" || p.name.includes(search) || p.type.includes(search))
               )}
@@ -550,7 +572,7 @@ export default function Index() {
             <SearchPage
               search={search} setSearch={setSearch}
               sort={searchSort} setSort={setSearchSort}
-              places={places} onPlace={goPlace}
+              places={cityPlaces} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onBack={() => setPage("home")}
               onAdd={() => setPage("addPlace")}
@@ -561,7 +583,7 @@ export default function Index() {
               cat={filterCat === "全部" ? "餐厅" : filterCat as Exclude<Category, "全部">}
               setCat={(c) => setFilterCat(c)}
               sort={catSort} setSort={setCatSort}
-              places={places} onPlace={goPlace}
+              places={cityPlaces} onPlace={goPlace}
               favorites={favorites} onFav={toggleFav}
               onBack={() => setPage("home")}
             />
@@ -594,7 +616,7 @@ export default function Index() {
           )}
           {page === "note" && (
             <NotePage
-              places={places} initialPlaceId={activePlace?.id}
+              places={cityPlaces.length > 0 ? cityPlaces : places} initialPlaceId={activePlace?.id}
               onBack={() => setPage(activePlace ? "detail" : "publish")}
               onSubmit={submitNote}
             />
@@ -603,8 +625,17 @@ export default function Index() {
             <NotesPlazaPage
               notes={allNotes}
               onGoNote={() => setPage("note")}
+              onOpen={(n) => { setActiveNote(n); setPage("noteDetail"); }}
               onToggleLike={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isLiked: !n.isLiked, likes: (n.likes || 0) + (n.isLiked ? -1 : 1) } : n))}
               onToggleCollect={(id) => setAllNotes(prev => prev.map(n => n.id === id ? { ...n, isCollected: !n.isCollected } : n))}
+            />
+          )}
+          {page === "noteDetail" && activeNote && (
+            <NoteDetailPage
+              note={activeNote}
+              onBack={() => setPage("myNotes")}
+              onToggleLike={() => setAllNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, isLiked: !n.isLiked, likes: (n.likes || 0) + (n.isLiked ? -1 : 1) } : n))}
+              onToggleCollect={() => setAllNotes(prev => prev.map(n => n.id === activeNote.id ? { ...n, isCollected: !n.isCollected } : n))}
             />
           )}
           {page === "addPlace" && (
@@ -621,12 +652,13 @@ export default function Index() {
             <CorrectionPage place={activePlace} onBack={() => setPage("detail")} />
           )}
           {page === "rank" && (
-            <RankPage places={places} onPlace={goPlace} favorites={favorites} onFav={toggleFav} />
+            <RankPage city={city} places={cityPlaces} onPlace={goPlace} favorites={favorites} onFav={toggleFav} />
           )}
           {page === "me" && (
             <MePage
               points={points} favCount={favorites.length} historyCount={history.length}
               city={city}
+              onCityClick={() => openCitySelect("me")}
               onWithdraw={() => setPage("withdraw")}
               onPoints={() => setPage("points")}
               onFavorites={() => setPage("favorites")}
@@ -668,9 +700,17 @@ export default function Index() {
           {page === "settings" && (
             <SettingsPage
               fontSize={fontSize} setFontSize={setFontSize}
-              city={city} setCity={setCity}
+              city={city}
+              onCityClick={() => openCitySelect("settings")}
               notifyOn={notifyOn} setNotifyOn={setNotifyOn}
               onBack={() => setPage("me")}
+            />
+          )}
+          {page === "citySelect" && (
+            <CitySelectPage
+              city={city}
+              onBack={() => setPage(cityReturnPage)}
+              onPick={onCityChosen}
             />
           )}
         </div>
