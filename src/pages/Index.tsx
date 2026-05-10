@@ -1251,14 +1251,39 @@ function ReviewPage({ place, city, onBack, onSubmit }: {
   const [smell, setSmell] = useState<"" | "有" | "无">("");
   const [staff, setStaff] = useState<"" | "是" | "否">("");
   const [text, setText] = useState("");
-  const [hasImg, setHasImg] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => { images.forEach(u => URL.revokeObjectURL(u)); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onPickFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+    if (!files.length) { e.target.value = ""; return; }
+    const remain = 3 - images.length;
+    const accepted = files.slice(0, Math.max(0, remain));
+    if (files.length > remain) toast.error("最多上传 3 张图片");
+    setImages(prev => [...prev, ...accepted.map(f => URL.createObjectURL(f))]);
+    e.target.value = "";
+  };
+  const removeImage = (i: number) => {
+    setImages(prev => {
+      URL.revokeObjectURL(prev[i]);
+      return prev.filter((_, idx) => idx !== i);
+    });
+  };
 
   const ready = name.trim() && type && sign && smoker && smell && staff;
 
   const handleSubmit = () => {
     if (!name.trim()) { toast.error("请输入场所名称"); return; }
     if (!type) { toast.error("请选择场所类型"); return; }
-    if (!sign || !smoker || !smell || !staff) { toast.error("请完成 4 个评价问题"); return; }
+    if (!sign) { toast.error("请选择是否看到无烟标志"); return; }
+    if (!smoker) { toast.error("请选择是否有人吸烟"); return; }
+    if (!smell) { toast.error("请选择是否有烟味"); return; }
+    if (!staff) { toast.error("请选择是否有人劝阻吸烟"); return; }
     onSubmit({
       sign: sign as any, smoker: smoker as any, smell: smell as any, staff: staff as any,
       name: name.trim(), type: type as Exclude<Category, "全部">, text,
