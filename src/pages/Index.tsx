@@ -1917,18 +1917,18 @@ function WithdrawPage({ points, address, onConnect, onSwitchWallet, onSubmit, re
 
         {/* 提现金额 */}
         <div className="bg-card border border-border rounded-2xl p-4">
-          <div className="text-sm font-medium mb-2">提现积分（最少 1000 起兑）</div>
+          <div className="text-sm font-medium mb-2">提现积分（最少 50 起兑）</div>
           <div className="flex items-center gap-2">
             <input value={amount} onChange={e => setAmount(e.target.value.replace(/\D/g, ""))}
               placeholder="请输入提现积分数量"
               className="flex-1 h-11 bg-secondary rounded-xl px-3 text-sm outline-none" />
-            <button onClick={() => setAmount(String(Math.floor(points / 1000) * 1000))} className="h-11 px-3 rounded-xl bg-primary-soft text-primary text-xs font-medium shrink-0">
+            <button onClick={() => setAmount(String(Math.floor(points / 50) * 50))} className="h-11 px-3 rounded-xl bg-primary-soft text-primary text-xs font-medium shrink-0">
               全部兑换
             </button>
           </div>
-          {amount && parseInt(amount, 10) >= 1000 && (
+          {amount && parseInt(amount, 10) >= 50 && (
             <div className="text-[11px] text-muted-foreground mt-2">
-              预计获得 {(Math.floor(parseInt(amount, 10) / 1000) * 0.001).toFixed(3)} AVAX
+              预计获得 {(Math.floor(parseInt(amount, 10) / 50) * 0.01).toFixed(2)} AVAX
             </div>
           )}
         </div>
