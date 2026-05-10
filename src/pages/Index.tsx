@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { connectPhantom, exchangePoints, getPhantom, POINTS_PER_EXCHANGE } from "@/lib/solana/exchange";
 import {
