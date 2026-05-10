@@ -2354,15 +2354,14 @@ function HelpPage({ onBack }: { onBack: () => void }) {
 
 /* =================== Settings =================== */
 
-const CITIES = ["上海市 静安区", "上海市 徐汇区", "上海市 浦东新区", "北京市 朝阳区", "深圳市 南山区", "杭州市 西湖区"];
+const HOT_CITIES = ["上海市", "北京市", "深圳市", "广州市", "杭州市", "成都市", "武汉市", "南京市"];
 
-function SettingsPage({ fontSize, setFontSize, city, setCity, notifyOn, setNotifyOn, onBack }: {
+function SettingsPage({ fontSize, setFontSize, city, onCityClick, notifyOn, setNotifyOn, onBack }: {
   fontSize: FontSize; setFontSize: (f: FontSize) => void;
-  city: string; setCity: (c: string) => void;
+  city: string; onCityClick: () => void;
   notifyOn: boolean; setNotifyOn: (v: boolean) => void;
   onBack: () => void;
 }) {
-  const [showCity, setShowCity] = useState(false);
   return (
     <div>
       <TopBar title="设置" onBack={onBack} />
@@ -2378,7 +2377,7 @@ function SettingsPage({ fontSize, setFontSize, city, setCity, notifyOn, setNotif
           <div className="text-xs text-muted-foreground mt-2">效果会立即应用到全 App</div>
         </div>
 
-        <button onClick={() => setShowCity(true)} className="w-full bg-card border border-border rounded-2xl p-4 flex items-center justify-between active:bg-secondary">
+        <button onClick={onCityClick} className="w-full bg-card border border-border rounded-2xl p-4 flex items-center justify-between active:bg-secondary">
           <span className="text-sm font-medium flex items-center gap-1.5"><MapPinned className="w-4 h-4 text-primary" />城市切换</span>
           <span className="text-xs text-muted-foreground flex items-center gap-1">{city}<ChevronRight className="w-4 h-4" /></span>
         </button>
@@ -2401,26 +2400,39 @@ function SettingsPage({ fontSize, setFontSize, city, setCity, notifyOn, setNotif
           <p className="text-xs text-muted-foreground leading-relaxed">空气点评是一个聚焦城市公共场所无烟环境的轻量级公益评价产品，让每一次呼吸都更清新。</p>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {showCity && (
-        <div className="absolute inset-0 z-50 bg-black/40 flex items-end" onClick={() => setShowCity(false)}>
-          <div onClick={e => e.stopPropagation()} className="w-full bg-card rounded-t-3xl p-4 max-h-[60%] overflow-y-auto">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold">选择城市</span>
-              <button onClick={() => setShowCity(false)}><X className="w-4 h-4 text-muted-foreground" /></button>
-            </div>
-            <div className="space-y-1">
-              {CITIES.map(c => (
-                <button key={c} onClick={() => { setCity(c); setShowCity(false); toast.success(`已切换到 ${c}`); }}
-                  className={`w-full h-12 rounded-xl text-sm flex items-center justify-between px-3 ${c === city ? "bg-primary-soft text-primary" : "active:bg-secondary"}`}>
-                  <span>{c}</span>
-                  {c === city && <Check className="w-4 h-4" />}
-                </button>
-              ))}
-            </div>
-          </div>
+function CitySelectPage({ city, onBack, onPick }: { city: string; onBack: () => void; onPick: (c: string) => void }) {
+  const [kw, setKw] = useState("");
+  const list = HOT_CITIES.filter(c => !kw || c.includes(kw));
+  return (
+    <div>
+      <TopBar title="选择城市" onBack={onBack} />
+      <div className="p-4 space-y-4">
+        <div className="bg-card border border-border rounded-2xl px-3 h-10 flex items-center gap-2">
+          <Search className="w-4 h-4 text-muted-foreground" />
+          <input value={kw} onChange={e => setKw(e.target.value)} placeholder="搜索城市"
+            className="flex-1 bg-transparent text-sm outline-none" />
         </div>
-      )}
+        <div className="bg-card border border-border rounded-2xl p-4">
+          <div className="text-xs text-muted-foreground mb-2">当前城市</div>
+          <div className="flex items-center gap-2 text-sm text-primary"><MapPin className="w-4 h-4" />{city}</div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground mb-2">热门城市</div>
+          <div className="grid grid-cols-3 gap-2">
+            {list.map(c => (
+              <button key={c} onClick={() => onPick(c)}
+                className={`h-10 rounded-xl text-sm border ${c === city ? "bg-primary-soft text-primary border-primary" : "bg-card border-border active:bg-secondary"}`}>
+                {c}
+              </button>
+            ))}
+          </div>
+          {list.length === 0 && <div className="text-xs text-muted-foreground text-center py-6">未找到匹配城市</div>}
+        </div>
+      </div>
     </div>
   );
 }
