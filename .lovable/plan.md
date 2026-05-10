@@ -1,56 +1,44 @@
-## 写评价页面定点修复方案
+## 提现兑换 AVAX 比例调整方案
 
-经检查 `src/pages/Index.tsx` 的 `ReviewPage`（约 1240–1326 行），现有实现已覆盖绝大部分需求：场所名称为受控 input、场所类型按钮选中态、四个问题用 `ChoiceRow` 单选并保存到独立 state、提交时校验并触发外层评分/积分/跳转逻辑。**真正需要修的只有两点**：图片上传是假按钮，校验提示不够细分。本次只动 `ReviewPage` 内部，其他业务逻辑、视觉、底部导航、积分、评分、跳转一律保留。
+将兑换比例从「1000 积分 = 0.001 AVAX」改为「50 积分 = 0.01 AVAX」（即每积分 0.0002 AVAX，最低 50 起兑）。仅修改前端展示、校验和兑换循环次数；保留 Phantom 连接、Solana Devnet 合约卡片、绿色视觉与路由。
 
-### 1. 图片上传改为真实文件选择 + 预览 + 删除
+### 改动点（均在 `src/pages/Index.tsx`）
 
-替换当前「点击切换 hasImg」的占位按钮，改为真正的本地图片选择：
+1. **常量**：在 `WithdrawPage` 与 `submitWithdraw` 作用域内引入本地常量
+   - `POINTS_PER_UNIT = 50`
+   - `AVAX_PER_UNIT = 0.01`
+   - 不再使用 `POINTS_PER_EXCHANGE`（值为 1000），保留 import 但改为本地新常量计算。
 
-- 用隐藏 `<input type="file" accept="image/*" multiple>`（移动端自动支持相册 / 相机），通过 `ref.current.click()` 触发。
-- 新增 state：`const [images, setImages] = useState<string[]>([])`，每张图片用 `URL.createObjectURL(file)` 生成预览地址。
-- 选择后的处理：
-  - 过滤非图片类型；
-  - 累计后超过 3 张时，截断到 3 张并 `toast.error("最多上传 3 张图片")`；
-  - 选择后清空 input 的 value，避免相同文件无法再次选中。
-- 视觉（保持当前浅绿色风格）：
-  - 上传前：保留原虚线浅绿区域，图标 `Camera` + 文案「添加图片」+ 说明「可上传禁烟标志或场所环境图片」。
-  - 上传后：3 列网格 (`grid-cols-3 gap-2`)，每个格子 `aspect-square rounded-xl overflow-hidden`，图片 `object-cover`，右上角圆形删除按钮 (`X` 图标，黑色半透明背景)。
-  - 已上传少于 3 张时，最后一格仍是「+ 添加」入口。
-- 删除时：调用 `URL.revokeObjectURL(images[i])` 释放资源后再 `setImages`。
-- 组件 `useEffect` 卸载时统一 `revokeObjectURL` 防止内存泄漏。
-- 移除旧的 `hasImg` state 和 `Check / Camera` 切换逻辑。
+2. **顶部卡片文案**（约 1881 行）
+   - 「兑换比率：1000 积分 = 0.001 AVAX」→「兑换比率：50 积分 = 0.01 AVAX」
 
-### 2. 提交校验：四个问题分别给出对应提示
+3. **输入区文案与全部兑换按钮**（约 1920–1932 行）
+   - 标题：「提现积分（最少 50 起兑）」
+   - 全部兑换：`setAmount(String(Math.floor(points / 50) * 50))`
+   - 实时预计：`amount && parseInt(amount,10) >= 50` 时显示
+     `预计获得 {(Math.floor(parseInt(amount,10) / 50) * 0.01).toFixed(2)} AVAX`
 
-把原先合并的 `if (!sign || !smoker || !smell || !staff)` 拆成四条，按需求顺序提示：
+4. **`WithdrawPage` 内 `submit` 校验**（约 1866–1872 行）改为：
+   - 空 → 「请输入提现积分数量」
+   - `< 50` → 「最低 50 积分起兑」
+   - `> points` → 「积分余额不足」
+   - 通过后向下取整到 50 的整数倍后传给 `onSubmit`
 
-- 未选「无烟标志」→「请选择是否看到无烟标志」
-- 未选「是否有人吸烟」→「请选择是否有人吸烟」
-- 未选「是否有烟味」→「请选择是否有烟味」
-- 未选「是否有人劝阻吸烟」→「请选择是否有人劝阻吸烟」
+5. **`submitWithdraw` 链上逻辑**（约 463–499 行）
+   - 校验文案同上（「最低 50 积分起兑」「积分余额不足」）
+   - `exchanges = Math.floor(amount / 50)`，`usePoints = exchanges * 50`
+   - 链上循环调用 `exchangePoints(phantom)` `exchanges` 次（合约本身一次调用单位不变，前端按 50 积分 = 一次兑换的口径循环；金额展示按新比例）
+   - 记录文案：`已上链 (${(exchanges * 0.01).toFixed(2)} AVAX)`
+   - 其余 toast、记录、扣分流程保持
 
-场所名称、场所类型现有提示文案保留不变。
+### 不动的内容
 
-### 3. 其他保持不动（已确认现状满足需求）
+- Phantom 连接 / 切换 / 复制地址区块
+- Solana Devnet 合约展示卡片（Program: Hs768q1NX1...）
+- 顶部绿色渐变卡、整体绿色风格、底部导航、路由结构
+- 积分获取规则（评价 +5、笔记 +10、场所 +10）
+- 兑换记录列表 UI
 
-- 场所名称：已是受控 input，placeholder「例如：星巴克 静安寺店」、绑定 `name` state，提交读取真实值。
-- 场所类型：`CATEGORIES.map` 渲染按钮，选中态 `bg-primary text-primary-foreground`，点击 `setType`。
-- 四个问题：复用 `ChoiceRow`，单选、可改、绿色选中态、保存到独立 state。
-- 提交按钮：底部固定，`ready` 为 false 时半透明，文案「提交评价（+5 积分）」。
-- 提交成功后的弹窗、积分 +5、评价插入场所详情页顶部、评价数 +1、空气评分按 1 / 1.5 / 1.5 / 1 重新计算、跳转场所详情页 —— 这些都在 `ReviewPage` 外层（父组件 `onSubmit` 处理器）已经实现，**本次不动**。
-- 评分规则与标签：已在排行/详情页计算逻辑里使用，本次不改公式。
+### 备注
 
-### 技术细节
-
-- 文件：仅修改 `src/pages/Index.tsx` 中 `ReviewPage` 函数体（约 1240–1326 行）。
-- 新增依赖：无。`Camera` / `X` 图标已从 `lucide-react` 引入。
-- 图片仅前端预览，不上传服务器；`onSubmit` 签名暂不扩展 `images` 字段以避免破坏现有业务流，如后续需要可再接入。
-- 移动端可滑动 + 底部按钮固定的能力由现有 `PhoneShell` 提供，无需改动。
-
-### 验收路径
-
-1. 写评价 → 输入名称 / 选类型 / 四问选择 / 提交 → 积分 +5、跳详情页。
-2. 点击上传区 → 系统选图器打开（手机可选相册/相机）→ 出现预览。
-3. 连选 4 张 → 截断到 3 张 + toast「最多上传 3 张图片」；删除 1 张后可继续添加。
-4. 漏填任一问题 → 显示对应文案。
-5. 控制台无 Runtime error，移动端无横向滚动，提交按钮始终可见。
+链上 `exchange_points` 合约方法本身无金额参数（每次调用消耗固定积分换固定 AVAX），所以「按新比例传入」在前端通过「调用次数 = 积分/50」实现，UI 与积分扣减、AVAX 到账文案严格按 50:0.01 同步。
