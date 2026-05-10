@@ -1679,13 +1679,59 @@ function NotesPlazaPage({ notes, onGoNote, onOpen, onToggleLike, onToggleCollect
 
 /* =================== Rank =================== */
 
+const POSITIVE_TAGS = ["无烟友好", "全店无烟", "室内无烟", "全场无烟", "公共区无烟", "无烟楼层", "大堂无烟", "影厅无烟", "阅读区无烟", "禁烟标志", "通风良好", "空气清爽", "有提示牌", "工作人员劝阻", "店员劝阻", "空气安静", "更衣室清新"];
+const NEGATIVE_TAGS = ["吸烟反馈较多", "需要观察", "包厢有烟味", "禁烟执行弱", "有烟味反馈", "缺少劝阻", "走廊偶有烟味", "门口有人吸烟"];
+
+const parseDistance = (s: string) => {
+  const n = parseFloat(s);
+  if (isNaN(n)) return 99999;
+  return /km/i.test(s) ? n * 1000 : n;
+};
+const parseFreshness = (s: string) => {
+  if (!s) return 99999;
+  const num = parseInt(s, 10) || 1;
+  if (s.includes("分钟")) return num;
+  if (s.includes("小时")) return num * 60;
+  if (s.includes("今天")) return 0;
+  if (s.includes("昨天")) return 24 * 60;
+  if (s.includes("天")) return num * 24 * 60;
+  return 99999;
+};
+const placeFreshness = (p: Place) => {
+  const times = (p.reviews || []).map(r => parseFreshness(r.time));
+  return times.length ? Math.min(...times) : 99999;
+};
+const pickTag = (tags: string[], pool: string[]) => tags.find(t => pool.includes(t)) || tags[0] || "";
+
 function RankPage({ city, places, onPlace, favorites, onFav }: { city?: string; places: Place[]; onPlace: (p: Place) => void; favorites: number[]; onFav: (id: number) => void; }) {
   const [tab, setTab] = useState<"clean" | "improve">("clean");
   const list = useMemo(() => {
-    const arr = places.map(p => ({ p, score: placeAvgScore(p) }));
-    if (tab === "clean") arr.sort((a, b) => b.score - a.score);
-    else arr.sort((a, b) => b.p.smokeReports - a.p.smokeReports);
-    return arr.slice(0, 10);
+    const scored = places.map(p => ({
+      p,
+      score: placeAvgScore(p),
+      dist: parseDistance(p.distance),
+      fresh: placeFreshness(p),
+    }));
+    if (tab === "clean") {
+      return scored
+        .filter(x => x.score >= 4.0)
+        .sort((a, b) =>
+          b.score - a.score ||
+          b.p.reviewCount - a.p.reviewCount ||
+          a.dist - b.dist
+        )
+        .slice(0, 10);
+    }
+    const candidates = [...scored].sort((a, b) =>
+      b.p.smokeReports - a.p.smokeReports ||
+      a.score - b.score ||
+      a.fresh - b.fresh ||
+      a.dist - b.dist
+    );
+    const top3 = candidates.filter(x => x.score < 4.5).slice(0, 3);
+    const topIds = new Set(top3.map(x => x.p.id));
+    const rest = candidates.filter(x => !topIds.has(x.p.id));
+    return [...top3, ...rest].slice(0, 10);
   }, [tab, places]);
 
   return (
@@ -1702,32 +1748,40 @@ function RankPage({ city, places, onPlace, favorites, onFav }: { city?: string; 
       </div>
 
       <div className="p-4 space-y-2">
-        {list.map(({ p, score }, i) => (
-          <button key={p.id} onClick={() => onPlace(p)}
-            className="w-full bg-card border border-border rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition text-left">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
-              i === 0 ? "bg-accent text-accent-foreground" :
-              i === 1 ? "bg-primary text-primary-foreground" :
-              i === 2 ? "bg-primary-soft text-primary" :
-              "bg-secondary text-foreground"
-            }`}>{i + 1}</div>
-            <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-sm truncate">{p.name}</h3>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <ScoreBadge score={score} />
-                <StatusTag score={score} />
-                {tab === "improve" && (
-                  <span className="text-[10px] text-destructive bg-destructive/10 px-1.5 rounded">{p.smokeReports} 反馈</span>
-                )}
+        {list.length === 0 && (
+          <div className="text-center text-xs text-muted-foreground py-12">
+            {tab === "clean" ? "暂无 4.0 分及以上的无烟场所" : "暂无需要改进的场所"}
+          </div>
+        )}
+        {list.map(({ p, score }, i) => {
+          const tag = pickTag(p.tags, tab === "clean" ? POSITIVE_TAGS : NEGATIVE_TAGS);
+          return (
+            <button key={p.id} onClick={() => onPlace(p)}
+              className="w-full bg-card border border-border rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99] transition text-left">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${
+                i === 0 ? "bg-accent text-accent-foreground" :
+                i === 1 ? "bg-primary text-primary-foreground" :
+                i === 2 ? "bg-primary-soft text-primary" :
+                "bg-secondary text-foreground"
+              }`}>{i + 1}</div>
+              <PlaceImg src={p.img} type={p.type} className="w-12 h-12 rounded-xl object-cover bg-secondary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm truncate">{p.name}</h3>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <ScoreBadge score={score} />
+                  <StatusTag score={score} />
+                  {tab === "improve" && (
+                    <span className="text-[10px] text-destructive bg-destructive/10 px-1.5 rounded">{p.smokeReports} 反馈</span>
+                  )}
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{tag} · {p.distance}</div>
               </div>
-              <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.tags[0]} · {p.distance}</div>
-            </div>
-            <button onClick={(e) => { e.stopPropagation(); onFav(p.id); }} className="p-2">
-              <Bookmark className={`w-4 h-4 ${favorites.includes(p.id) ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+              <button onClick={(e) => { e.stopPropagation(); onFav(p.id); }} className="p-2">
+                <Bookmark className={`w-4 h-4 ${favorites.includes(p.id) ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+              </button>
             </button>
-          </button>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
